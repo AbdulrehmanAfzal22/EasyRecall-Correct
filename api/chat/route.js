@@ -6,6 +6,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+// Post-process response to remove any markdown bold markers
+function cleanResponse(text) {
+  if (!text) return text;
+  // Remove ** markers but preserve the text between them
+  return text.replace(/\*\*(.*?)\*\*/g, '$1');
+}
+
 export async function POST(req) {
   try {
     // Handle both JSON and FormData
@@ -60,9 +67,13 @@ export async function POST(req) {
       );
     }
 
-    // System prompt for study assistant
-    const systemPrompt = `You are a helpful AI study assistant designed to help students learn effectively. Your role is to:
+    // System prompt - CRITICAL: NO BOLD MARKERS ALLOWED
+    const systemPrompt = `You are a helpful AI study assistant designed to help students learn effectively.
 
+CRITICAL INSTRUCTION - YOU MUST FOLLOW THIS:
+NEVER use ** (double asterisks) for bold text in your responses. NEVER use markdown formatting. Use plain text only.
+
+Your role is to:
 1. Explain complex concepts in simple, easy-to-understand terms
 2. Answer questions about any academic subject
 3. Create study plans and learning strategies
@@ -83,8 +94,10 @@ Guidelines:
 - When analyzing images or screenshots, describe what you see and relate it to the learning context
 - For text documents, summarize key points and help students understand the content
 - Always aim to make learning engaging and accessible for students of all levels
+- Be very informative and give answers only if you are 100% sure they are correct
+- If you are not sure about the answer, say "I'm not sure about that, but I can help you find more information."
 
-When you receive images or documents, focus on educational content and help students learn from the visual or textual information provided.`;
+REMEMBER: DO NOT USE ** FOR BOLD. DO NOT USE MARKDOWN. PLAIN TEXT ONLY.`;
 
     // Prepare messages for OpenAI
     const openaiMessages = [
@@ -140,23 +153,25 @@ When you receive images or documents, focus on educational content and help stud
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Supports vision
+      model: "gpt-4o-mini",
       max_tokens: 2000,
       messages: openaiMessages,
     });
 
-    // Extract the response text
-    const assistantMessage = response.choices[0].message.content;
+    // Extract the response text and clean it
+    let assistantMessage = response.choices[0].message.content;
+    
+    // Post-process to remove any remaining ** markers
+    assistantMessage = cleanResponse(assistantMessage);
 
     return NextResponse.json({
       message: assistantMessage,
-      content: assistantMessage, // Support both formats
+      content: assistantMessage,
     });
 
   } catch (error) {
     console.error("Chat API error:", error);
 
-    // Handle specific OpenAI API errors
     if (error.status === 429) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please try again in a moment." },

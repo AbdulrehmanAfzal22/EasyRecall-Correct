@@ -6,12 +6,13 @@ import {
   LayoutDashboard, FileText, Layers, BrainCircuit,
   ClipboardList, BarChart2, HelpCircle,
   ChevronLeft, ChevronRight, Sun, Moon,
-  LogOut, ChevronUp,MessageCircle
+  LogOut, ChevronUp, MessageCircle
 } from "lucide-react";
 import { useAuth } from "../../AuthProvider";
 import "./sidebar.css";
 import Image from "next/image";
 import logo from "../../../../public/assets/logo.png"
+
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/page/dashboard/dash-home", icon: LayoutDashboard },
   { label: "Documents", href: "/page/dashboard/content-intake", icon: FileText },
@@ -20,7 +21,7 @@ const NAV_ITEMS = [
   { label: "Quizzes", href: "/page/dashboard/quiz", icon: BrainCircuit },
   { label: "Content", href: "/page/dashboard/documents", icon: ClipboardList },
   { label: "Topics", href: "/page/dashboard/segments", icon: HelpCircle },
-    { label: "Chat with AI", href: "/page/dashboard/chat-ai", icon: MessageCircle },
+  { label: "Chat with AI", href: "/page/dashboard/chat-ai", icon: MessageCircle },
 ];
 
 export default function Sidebar({ isDark, onToggleTheme }) {
@@ -53,6 +54,17 @@ export default function Sidebar({ isDark, onToggleTheme }) {
     }
   };
 
+  // KEY FUNCTION: Handle profile click - expand sidebar if collapsed
+  const handleProfileClick = () => {
+    if (collapsed) {
+      setCollapsed(false); // Expand sidebar first
+      // Small delay to allow animation, then open menu
+      setTimeout(() => setMenuOpen(true), 150);
+    } else {
+      setMenuOpen((p) => !p); // Just toggle menu if already expanded
+    }
+  };
+
   const displayName = user?.displayName || user?.email?.split("@")[0] || "User";
   const email = user?.email || "";
   const photoURL = user?.photoURL;
@@ -65,12 +77,6 @@ export default function Sidebar({ isDark, onToggleTheme }) {
       <div className="sidebar-brand">
         <div className="sidebar-brand-icon">
           <Image src={logo} alt="EasyRecall Logo" className="sidebar-logo" />
-
-          {/* <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L2 7l10 5 10-5-10-5z" fill="currentColor" opacity="0.9"/>
-            <path d="M2 17l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.6"/>
-            <path d="M2 12l10 5 10-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.8"/>
-          </svg> */}
         </div>
         {!collapsed && <span className="sidebar-brand-name">EasyRecall</span>}
       </div>
@@ -116,6 +122,7 @@ export default function Sidebar({ isDark, onToggleTheme }) {
       {/* ── User profile ── */}
       {user && (
         <div className="sidebar-profile-wrap" ref={menuRef}>
+          {/* Profile Menu (only shows when expanded) */}
           {menuOpen && !collapsed && (
             <div className="sidebar-profile-menu">
               <div className="spm-user-header">
@@ -137,10 +144,11 @@ export default function Sidebar({ isDark, onToggleTheme }) {
             </div>
           )}
 
+          {/* Profile Trigger Button */}
           <button
             className={`sidebar-profile ${collapsed ? "sidebar-profile--collapsed" : ""}`}
-            onClick={() => setMenuOpen((p) => !p)}
-            title={collapsed ? `${displayName} — click to sign out` : undefined}
+            onClick={handleProfileClick}
+            title={collapsed ? `${displayName} — click to expand` : undefined}
             aria-expanded={menuOpen}
           >
             <div className="sp-avatar">
@@ -160,6 +168,7 @@ export default function Sidebar({ isDark, onToggleTheme }) {
             )}
           </button>
 
+          {/* Collapsed state mini menu (optional - shows logout only) */}
           {collapsed && menuOpen && (
             <div className="sidebar-profile-menu sidebar-profile-menu--collapsed">
               <button className="spm-item spm-item--logout" onClick={handleLogout} disabled={loggingOut}>

@@ -1,26 +1,24 @@
 "use client";
 
-
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { Send, Sparkles, Bot, User, Loader2, RotateCcw, Plus, X, FileText, ImageIcon, Menu, History, MessageSquare, Trash2 } from "lucide-react";
+import { Send, Sparkles, Bot, User, Loader2, RotateCcw, Plus, X, FileText, ImageIcon, Menu, History, MessageSquare, Trash2, ChevronDown } from "lucide-react";
 import { useAuth } from "../../AuthProvider";
 import { saveChatToFirestore, getUserChats, getChatById, deleteChatFromFirestore, subscribeToUserChats } from "@/lib/firebaseStore";
-import { checkAndIncrement, getRemaining } from "@/lib/usageService";
 import { checkAndIncrement, getRemaining } from "@/lib/usageService";
 import "./ai-chat.css";
 
 // Helper: Bold topic headings like "1. Matter:" or "2. Energy:"
 function formatTopicHeadings(text) {
-  // Replace lines starting with number, period, and space, then a word and colon
   return text.replace(/^(\d+\.)\s*([A-Za-z0-9 \-]+):/gm, (match, num, topic) => {
     return `<b>${num} ${topic}:</b>`;
   });
 }
 
-// ── Usage Progress Bar Component  ─────────────────────────────────────────────
+// ── Collapsible Usage Progress Bar Component ─────────────────────────────────
 function ChatUsageBar({ usageInfo }) {
+  const [isOpen, setIsOpen] = useState(true);
+
   if (!usageInfo) return null;
 
   const uploadUsed = usageInfo.uploadLimit === Infinity ? 0
@@ -36,113 +34,131 @@ function ChatUsageBar({ usageInfo }) {
   const getColor = (pct) =>
     pct >= 90 ? "#ef4444" : pct >= 70 ? "#f97316" : "#6366f1";
 
+  const getSummary = () => {
+    if (usageInfo.chats === Infinity) return "Unlimited plan";
+    const totalUsed = (usageInfo.chatLimit - usageInfo.chats) + (usageInfo.uploadLimit - usageInfo.uploads);
+    const totalLimit = usageInfo.chatLimit + usageInfo.uploadLimit;
+    return `${totalUsed}/${totalLimit} used`;
+  };
+
   return (
-    <div className="chat-usage-bar">
-      <div className="chat-usage-header">
-        <span className="chat-usage-plan">{usageInfo.label} Plan</span>
-        <span className="chat-usage-cycle">🔄 Resets monthly</span>
-      </div>
-
-      <div className="chat-usage-meters">
-        {/* ── Chat messages meter ── */}
-        <div className="chat-usage-meter">
-          <div className="chat-usage-meter-label">
-            <span>💬 Messages</span>
-            <span className="chat-usage-meter-count">
-              {usageInfo.chats === Infinity
-                ? "∞ remaining"
-                : `${usageInfo.chats} of ${usageInfo.chatLimit} remaining`}
+    <div className={`chat-usage-bar ${isOpen ? 'chat-usage-bar--open' : ''}`}>
+      <button 
+        className="chat-usage-toggle"
+        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+      >
+        <div className="chat-usage-header">
+          <span className="chat-usage-plan">
+            <span className="chat-usage-plan-icon">📊</span>
+            {usageInfo.label} Plan
+          </span>
+          <div className="chat-usage-toggle-right">
+            <span className="chat-usage-summary">{getSummary()}</span>
+            <span className={`chat-usage-chevron ${isOpen ? 'chat-usage-chevron--open' : ''}`}>
+              <ChevronDown size={18} />
             </span>
           </div>
-          {usageInfo.chats !== Infinity && (
-            <>
-              <div className="chat-usage-track">
-                <div
-                  className="chat-usage-fill"
-                  style={{ width: `${chatPct}%`, background: getColor(chatPct) }}
-                />
-              </div>
-              <div className="chat-usage-track-labels">
-                <span>{chatPct}% used</span>
-                {chatPct >= 80 && (
-                  <span className="chat-usage-warn">
-                    {usageInfo.chats === 0 ? "⚠ Limit reached" : `⚠ ${usageInfo.chats} left`}
-                  </span>
-                )}
-              </div>
-            </>
-          )}
         </div>
+      </button>
 
-        {/* ── Uploads meter ── */}
-        <div className="chat-usage-meter">
-          <div className="chat-usage-meter-label">
-            <span>📁 Uploads</span>
-            <span className="chat-usage-meter-count">
-              {usageInfo.uploads === Infinity
-                ? "∞ remaining"
-                : `${usageInfo.uploads} of ${usageInfo.uploadLimit} remaining`}
-            </span>
+      {isOpen && (
+        <div className="chat-usage-content">
+          <div className="chat-usage-cycle">🔄 Resets monthly</div>
+          
+          <div className="chat-usage-meters">
+            <div className="chat-usage-meter">
+              <div className="chat-usage-meter-label">
+                <span>💬 Messages</span>
+                <span className="chat-usage-meter-count">
+                  {usageInfo.chats === Infinity
+                    ? "∞ remaining"
+                    : `${usageInfo.chats} of ${usageInfo.chatLimit} remaining`}
+                </span>
+              </div>
+              {usageInfo.chats !== Infinity && (
+                <>
+                  <div className="chat-usage-track">
+                    <div
+                      className="chat-usage-fill"
+                      style={{ width: `${chatPct}%`, background: getColor(chatPct) }}
+                    />
+                  </div>
+                  <div className="chat-usage-track-labels">
+                    <span>{chatPct}% used</span>
+                    {chatPct >= 80 && (
+                      <span className="chat-usage-warn">
+                        {usageInfo.chats === 0 ? "⚠ Limit reached" : `⚠ ${usageInfo.chats} left`}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div className="chat-usage-meter">
+              <div className="chat-usage-meter-label">
+                <span>📁 Uploads</span>
+                <span className="chat-usage-meter-count">
+                  {usageInfo.uploads === Infinity
+                    ? "∞ remaining"
+                    : `${usageInfo.uploads} of ${usageInfo.uploadLimit} remaining`}
+                </span>
+              </div>
+              {usageInfo.uploads !== Infinity && (
+                <>
+                  <div className="chat-usage-track">
+                    <div
+                      className="chat-usage-fill"
+                      style={{ width: `${uploadPct}%`, background: getColor(uploadPct) }}
+                    />
+                  </div>
+                  <div className="chat-usage-track-labels">
+                    <span>{uploadPct}% used</span>
+                    {uploadPct >= 80 && (
+                      <span className="chat-usage-warn">
+                        {usageInfo.uploads === 0 ? "⚠ Limit reached" : `⚠ ${usageInfo.uploads} left`}
+                      </span>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-          {usageInfo.uploads !== Infinity && (
-            <>
-              <div className="chat-usage-track">
-                <div
-                  className="chat-usage-fill"
-                  style={{ width: `${uploadPct}%`, background: getColor(uploadPct) }}
-                />
-              </div>
-              <div className="chat-usage-track-labels">
-                <span>{uploadPct}% used</span>
-                {uploadPct >= 80 && (
-                  <span className="chat-usage-warn">
-                    {usageInfo.uploads === 0 ? "⚠ Limit reached" : `⚠ ${usageInfo.uploads} left`}
-                  </span>
-                )}
-              </div>
-            </>
+
+          {(usageInfo.chats === 0 || usageInfo.uploads === 0) && usageInfo.chats !== Infinity && (
+            <button
+              className="chat-usage-upgrade-btn"
+              onClick={() => window.location.href = "/page/pricing"}
+            >
+              ✦ Upgrade Plan →
+            </button>
           )}
         </div>
-      </div>
-
-      {(usageInfo.chats === 0 || usageInfo.uploads === 0) && usageInfo.chats !== Infinity && (
-        <button
-          className="chat-usage-upgrade-btn"
-          onClick={() => window.location.href = "/page/pricing"}
-        >
-          ✦ Upgrade Plan →
-        </button>
       )}
     </div>
   );
 }
 
+// Helper function for date formatting
+function formatDate(dateInput) {
+  const date = dateInput?.toDate ? dateInput.toDate() : new Date(dateInput);
+  const now = new Date();
+  const diff = now - date;
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  if (days === 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days} days ago`;
+  return date.toLocaleDateString();
+}
+
 export default function AIChat() {
-  const sendingRef = useRef(false);
   const sendingRef = useRef(false);
   const { user, loading } = useAuth();
   const router = useRouter();
-  const router = useRouter();
 
-  // Show loading while checking authentication
-  if (loading) {
-    return (
-      <div className="chat-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div className="chat-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div>Loading...</div>
-      </div>
-    );
-  }
-
-  // Show login message if not authenticated
-  if (!user) {
-    return (
-      <div className="chat-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <div className="chat-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <div>Please log in to use the AI chat.</div>
-      </div>
-    );
-  }
+  // KEY STATE: Controls sidebar visibility - when false, chat expands to full width
+  const [showSidebar, setShowSidebar] = useState(true);
 
   const [messages, setMessages] = useState([
     {
@@ -157,19 +173,12 @@ export default function AIChat() {
   const [attachments, setAttachments] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
 
-  // History & UI state
   const [chatHistory, setChatHistory] = useState([]);
   const [currentChatId, setCurrentChatId] = useState(null);
-  const [showHistory, setShowHistory] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalConfig, setModalConfig] = useState({ title: "", message: "", onConfirm: null });
   const [loadingHistory, setLoadingHistory] = useState(false);
 
-  // ── Usage state ──────────────────────────────────────────────────────────
-  const [usageInfo, setUsageInfo] = useState(null);
-  const [limitError, setLimitError] = useState("");
-
-  // ── Usage state ──────────────────────────────────────────────────────────
   const [usageInfo, setUsageInfo] = useState(null);
   const [limitError, setLimitError] = useState("");
 
@@ -177,29 +186,37 @@ export default function AIChat() {
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Function to refresh usage
+  if (loading) {
+    return (
+      <div className="chat-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="chat-page" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div>Please log in to use the AI chat.</div>
+      </div>
+    );
+  }
+
   const refreshUsage = useCallback(() => {
     if (!user) return;
     getRemaining(user.uid, user.email).then(setUsageInfo).catch(console.error);
   }, [user]);
 
-  // Load usage when user is ready
   useEffect(() => {
     refreshUsage();
   }, [refreshUsage]);
 
-  // Detect payment return and refresh usage
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const status = params.get('skipcash_status');
       if (status === 'success') {
-        console.log('💬 Chat: Payment success detected, refreshing usage in 3s');
-        // Wait for webhook to process, then refresh
-        const timer = setTimeout(() => {
-          console.log('🔄 Chat: Refreshing usage now');
-          refreshUsage();
-        }, 3000);
+        const timer = setTimeout(() => refreshUsage(), 3000);
         return () => clearTimeout(timer);
       }
     } catch (err) {
@@ -207,83 +224,27 @@ export default function AIChat() {
     }
   }, [refreshUsage]);
 
-  // Also refresh when page becomes visible (tab focus)
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('👀 Chat: Page became visible, refreshing usage');
-        refreshUsage();
-      }
+      if (!document.hidden) refreshUsage();
     };
-    
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [refreshUsage]);
 
-  // Function to refresh usage
-  const refreshUsage = useCallback(() => {
-    if (!user) return;
-    getRemaining(user.uid, user.email).then(setUsageInfo).catch(console.error);
-  }, [user]);
-
-  // Load usage when user is ready
-  useEffect(() => {
-    refreshUsage();
-  }, [refreshUsage]);
-
-  // Detect payment return and refresh usage
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const status = params.get('skipcash_status');
-      if (status === 'success') {
-        console.log('💬 Chat: Payment success detected, refreshing usage in 3s');
-        // Wait for webhook to process, then refresh
-        const timer = setTimeout(() => {
-          console.log('🔄 Chat: Refreshing usage now');
-          refreshUsage();
-        }, 3000);
-        return () => clearTimeout(timer);
-      }
-    } catch (err) {
-      console.error('Error detecting payment:', err);
-    }
-  }, [refreshUsage]);
-
-  // Also refresh when page becomes visible (tab focus)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        console.log('👀 Chat: Page became visible, refreshing usage');
-        refreshUsage();
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [refreshUsage]);
-
-  // Load chat history from Firebase when user is available
   useEffect(() => {
     if (!user) return;
-
     setLoadingHistory(true);
     const unsubscribe = subscribeToUserChats(user.uid, (result) => {
-      if (result.success) {
-        setChatHistory(result.data);
-      } else {
-        console.error("Failed to load chat history:", result.error);
-      }
+      if (result.success) setChatHistory(result.data);
+      else console.error("Failed to load chat history:", result.error);
       setLoadingHistory(false);
     });
-
     return () => unsubscribe();
   }, [user]);
 
-  // Auto-save current chat to Firebase
   useEffect(() => {
     if (!user || !currentChatId || messages.length <= 1) return;
-
     const saveChat = async () => {
       try {
         await saveChatToFirestore(user.uid, currentChatId, messages);
@@ -291,7 +252,6 @@ export default function AIChat() {
         console.error("Failed to save chat:", error);
       }
     };
-
     const timeoutId = setTimeout(saveChat, 1000);
     return () => clearTimeout(timeoutId);
   }, [messages, currentChatId, user]);
@@ -301,7 +261,6 @@ export default function AIChat() {
   };
 
   useEffect(() => { scrollToBottom(); }, [messages]);
-  useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
     if (textareaRef.current) {
@@ -310,24 +269,19 @@ export default function AIChat() {
     }
   }, [input]);
 
-  // ── Custom Modal ────────────────────────────────────────────────────
   const openModal = (title, message, onConfirm) => {
     setModalConfig({ title, message, onConfirm });
     setShowModal(true);
   };
 
   const closeModal = () => setShowModal(false);
-  const closeModal = () => setShowModal(false);
 
   const handleModalConfirm = () => {
-    if (modalConfig.onConfirm) modalConfig.onConfirm();
     if (modalConfig.onConfirm) modalConfig.onConfirm();
     closeModal();
   };
 
-  // ── Chat History Functions ──────────────────────────────────────────
   const saveCurrentChat = async () => {
-    if (!user || messages.length <= 1) return;
     if (!user || messages.length <= 1) return;
     try {
       const chatId = currentChatId || Date.now().toString();
@@ -345,7 +299,6 @@ export default function AIChat() {
       if (chat) {
         setMessages(chat.messages);
         setCurrentChatId(chat.id);
-        setShowHistory(false);
       }
     } catch (error) {
       console.error("Failed to load chat:", error);
@@ -361,7 +314,6 @@ export default function AIChat() {
       async () => {
         try {
           await deleteChatFromFirestore(user.uid, chatId);
-          if (currentChatId === chatId) startNewChat();
           if (currentChatId === chatId) startNewChat();
         } catch (error) {
           console.error("Failed to delete chat:", error);
@@ -382,12 +334,9 @@ export default function AIChat() {
     ]);
     setCurrentChatId(null);
     setAttachments([]);
-    setShowHistory(false);
-    setLimitError("");
     setLimitError("");
   };
 
-  // ── Attach helpers ──────────────────────────────────────────────────
   const addFiles = (files) => {
     const newAttachments = Array.from(files).map((file) => {
       const isImage = file.type.startsWith("image/");
@@ -411,7 +360,6 @@ export default function AIChat() {
     });
   };
 
-  // ── Paste (Ctrl+V) ──────────────────────────────────────────────────
   const handlePaste = useCallback((e) => {
     const items = e.clipboardData?.items;
     if (!items) return;
@@ -427,7 +375,6 @@ export default function AIChat() {
     return () => window.removeEventListener("paste", handlePaste);
   }, [handlePaste]);
 
-  // ── Drag & drop ─────────────────────────────────────────────────────
   const handleDragOver = (e) => { e.preventDefault(); setIsDragging(true); };
   const handleDragLeave = (e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsDragging(false); };
   const handleDrop = (e) => {
@@ -436,46 +383,20 @@ export default function AIChat() {
     if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
   };
 
-  // ── Send ─────────────────────────────────────────────────────────────
   const handleSend = async () => {
     if ((!input.trim() && attachments.length === 0) || isLoading || sendingRef.current) return;
     sendingRef.current = true;
 
-    // ── Check chat limit BEFORE sending ──────────────────────────────
     setLimitError("");
     const check = await checkAndIncrement(user.uid, user.email, "chats");
     if (!check.allowed) {
-      setLimitError(
-        `You've reached your ${check.label} plan limit of ${check.limit} messages/month. Upgrade to keep chatting.`
-      );
-      // Refresh usage display
+      setLimitError(`You've reached your ${check.label} plan limit of ${check.limit} messages/month. Upgrade to keep chatting.`);
       getRemaining(user.uid, user.email).then(setUsageInfo).catch(console.error);
-      // Redirect to pricing page
       setTimeout(() => router.push("/page/pricing"), 1500);
       return;
     }
-    // Refresh displayed usage after incrementing
-    getRemaining(user.uid, user.email).then(setUsageInfo).catch(console.error);
-    if ((!input.trim() && attachments.length === 0) || isLoading || sendingRef.current) return;
-    sendingRef.current = true;
-
-    // ── Check chat limit BEFORE sending ──────────────────────────────
-    setLimitError("");
-    const check = await checkAndIncrement(user.uid, user.email, "chats");
-    if (!check.allowed) {
-      setLimitError(
-        `You've reached your ${check.label} plan limit of ${check.limit} messages/month. Upgrade to keep chatting.`
-      );
-      // Refresh usage display
-      getRemaining(user.uid, user.email).then(setUsageInfo).catch(console.error);
-      // Redirect to pricing page
-      setTimeout(() => router.push("/page/pricing"), 1500);
-      return;
-    }
-    // Refresh displayed usage after incrementing
     getRemaining(user.uid, user.email).then(setUsageInfo).catch(console.error);
 
-    // Create new chat ID if this is the first message
     if (!currentChatId && messages.length === 1) {
       setCurrentChatId(Date.now().toString());
     }
@@ -502,13 +423,11 @@ export default function AIChat() {
             role: m.role,
             content: m.content,
             hasAttachments: m.attachments ? m.attachments.length > 0 : false,
-            hasAttachments: m.attachments ? m.attachments.length > 0 : false,
           }))
         )
       );
       attachments.forEach((att) => formData.append("files", att.file));
 
-      const response = await fetch("/api/chat", { method: "POST", body: formData });
       const response = await fetch("/api/chat", { method: "POST", body: formData });
       if (!response.ok) throw new Error("Failed to get response");
       const data = await response.json();
@@ -536,7 +455,6 @@ export default function AIChat() {
     } finally {
       setIsLoading(false);
       sendingRef.current = false;
-      sendingRef.current = false;
     }
   };
 
@@ -552,25 +470,11 @@ export default function AIChat() {
       "Reset Chat",
       "Clear all messages in the current chat? This action cannot be undone.",
       () => startNewChat()
-      () => startNewChat()
     );
   };
 
   const formatTime = (date) =>
     new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const formatTime = (date) =>
-    new Date(date).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-  const formatDate = (dateInput) => {
-    const date = dateInput?.toDate ? dateInput.toDate() : new Date(dateInput);
-    const now = new Date();
-    const diff = now - date;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return "Today";
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    return date.toLocaleDateString();
-  };
 
   const formatSize = (bytes) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -587,12 +491,9 @@ export default function AIChat() {
 
   const chatLimitReached = usageInfo && usageInfo.chats === 0 && usageInfo.chats !== Infinity;
   const canSend = (input.trim() || attachments.length > 0) && !isLoading && !chatLimitReached;
-  const chatLimitReached = usageInfo && usageInfo.chats === 0 && usageInfo.chats !== Infinity;
-  const canSend = (input.trim() || attachments.length > 0) && !isLoading && !chatLimitReached;
 
   return (
     <>
-      {/* Hidden file input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -602,13 +503,11 @@ export default function AIChat() {
         onChange={(e) => { if (e.target.files?.length) addFiles(e.target.files); e.target.value = ""; }}
       />
 
-      {/* Custom Modal */}
       {showModal && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-container" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">{modalConfig.title}</h3>
-              <button className="modal-close" onClick={closeModal}><X size={18} /></button>
               <button className="modal-close" onClick={closeModal}><X size={18} /></button>
             </div>
             <div className="modal-body">
@@ -617,78 +516,78 @@ export default function AIChat() {
             <div className="modal-footer">
               <button className="modal-btn modal-btn-cancel" onClick={closeModal}>Cancel</button>
               <button className="modal-btn modal-btn-confirm" onClick={handleModalConfirm}>Confirm</button>
-              <button className="modal-btn modal-btn-cancel" onClick={closeModal}>Cancel</button>
-              <button className="modal-btn modal-btn-confirm" onClick={handleModalConfirm}>Confirm</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="chat-page">
-        {/* History Sidebar */}
-        <div className={`chat-history-sidebar ${showHistory ? "chat-history-sidebar--open" : ""}`}>
-          <div className="chat-history-header">
-            <div className="chat-history-title">
-              <History size={18} />
-              <span>Chat History</span>
+      <div className={`chat-page ${showSidebar ? 'chat-page--with-sidebar' : 'chat-page--no-sidebar'}`}>
+        {/* COLLAPSIBLE SIDEBAR */}
+        {showSidebar && (
+          <div className="chat-sidebar">
+            <div className="chat-sidebar-header">
+              <h2 className="chat-sidebar-title">Chat History</h2>
+              <button 
+                className="chat-sidebar-toggle-btn"
+                onClick={() => setShowSidebar(false)}
+                title="Hide sidebar"
+              >
+                <ChevronDown size={20} style={{ transform: 'rotate(90deg)' }} />
+              </button>
             </div>
-            <button className="chat-history-close" onClick={() => setShowHistory(false)}>
-              <X size={18} />
+
+            <button className="chat-new-btn" onClick={startNewChat}>
+              <Plus size={16} />
+              New Chat
             </button>
-          </div>
 
-          <button className="chat-new-btn" onClick={startNewChat}>
-            <Plus size={16} />
-            New Chat
-          </button>
-
-          <div className="chat-history-list">
-            {loadingHistory ? (
-              <div className="chat-history-loading"><p>Loading chats...</p></div>
-              <div className="chat-history-loading"><p>Loading chats...</p></div>
-            ) : chatHistory.length === 0 ? (
-              <div className="chat-history-empty">
-                <MessageSquare size={32} opacity={0.3} />
-                <p>No chat history yet</p>
-              </div>
-            ) : (
-              chatHistory.map((chat) => (
-                <div
-                  key={chat.id}
-                  className={`chat-history-item ${currentChatId === chat.id ? "chat-history-item--active" : ""}`}
-                  onClick={() => loadChat(chat.id)}
-                >
-                  <div className="chat-history-item-content">
-                    <div className="chat-history-item-title">{chat.title || "Untitled Chat"}</div>
-                    <div className="chat-history-item-time">
-                      {formatDate(chat.updatedAt?.toDate?.() || chat.updatedAt || chat.timestamp)}
-                    </div>
-                  </div>
-                  <button
-                    className="chat-history-item-delete"
-                    onClick={(e) => deleteChat(chat.id, e)}
-                  >
-                    <Trash2 size={14} />
-                  </button>
+            <div className="chat-history-list">
+              {loadingHistory ? (
+                <div className="chat-history-loading"><p>Loading chats...</p></div>
+              ) : chatHistory.length === 0 ? (
+                <div className="chat-history-empty">
+                  <MessageSquare size={32} opacity={0.3} />
+                  <p>No chat history yet</p>
                 </div>
-              ))
-            )}
+              ) : (
+                chatHistory.map((chat) => (
+                  <div
+                    key={chat.id}
+                    className={`chat-history-item ${currentChatId === chat.id ? "chat-history-item--active" : ""}`}
+                    onClick={() => loadChat(chat.id)}
+                  >
+                    <div className="chat-history-item-content">
+                      <div className="chat-history-item-title">{chat.title || "Untitled Chat"}</div>
+                      <div className="chat-history-item-time">
+                        {formatDate(chat.updatedAt?.toDate?.() || chat.updatedAt || chat.timestamp)}
+                      </div>
+                    </div>
+                    <button
+                      className="chat-history-item-delete"
+                      onClick={(e) => deleteChat(chat.id, e)}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
-
-        {/* History Overlay (for mobile) */}
-        {showHistory && (
-          <div className="chat-history-overlay" onClick={() => setShowHistory(false)} />
         )}
 
-        {/* Main Chat */}
+        {/* MAIN CHAT - EXPANDS WHEN SIDEBAR IS HIDDEN */}
         <div className="chat-main">
-          {/* Topbar */}
           <div className="topbar">
             <div className="topbar-left">
-              <button className="chat-hamburger" onClick={() => setShowHistory(!showHistory)}>
-                <Menu size={20} />
-              </button>
+              {!showSidebar && (
+                <button 
+                  className="chat-show-sidebar-btn" 
+                  onClick={() => setShowSidebar(true)}
+                  title="Show sidebar"
+                >
+                  <Menu size={20} />
+                </button>
+              )}
               <h1>EasyRecall</h1>
               <p>Your personal learning companion</p>
             </div>
@@ -699,14 +598,12 @@ export default function AIChat() {
             </div>
           </div>
 
-          {/* Chat container */}
           <div
             className={`chat-container${isDragging ? " chat-container--dragging" : ""}`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
           >
-            {/* Drag overlay */}
             {isDragging && (
               <div className="chat-drop-overlay">
                 <div className="chat-drop-overlay-inner">
@@ -716,7 +613,6 @@ export default function AIChat() {
               </div>
             )}
 
-            {/* Messages */}
             <div className="chat-messages">
               {messages.map((msg) => (
                 <div key={msg.id} className={`chat-message chat-message--${msg.role}`}>
@@ -762,7 +658,6 @@ export default function AIChat() {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggestions */}
             {messages.length === 1 && (
               <div className="chat-suggestions">
                 <div className="chat-suggestions-title">
@@ -771,7 +666,7 @@ export default function AIChat() {
                 <div className="chat-suggestions-grid">
                   {SUGGESTIONS.map((s, idx) => (
                     <button key={idx} className="chat-suggestion-card" onClick={() => setInput(s.text)}>
-                      <span className="chat-suggestion-icon">{s.icon}</span>
+                      <span className="chat-attachment-icon">{s.icon}</span>
                       <span className="chat-suggestion-text">{s.text}</span>
                     </button>
                   ))}
@@ -779,13 +674,8 @@ export default function AIChat() {
               </div>
             )}
 
-            {/* ── Usage Bar ── */}
             <ChatUsageBar usageInfo={usageInfo} />
 
-            {/* ── Usage Bar ── */}
-            <ChatUsageBar usageInfo={usageInfo} />
-
-            {/* Input area */}
             <div className="chat-input-container">
               {attachments.length > 0 && (
                 <div className="chat-attachments-preview">
@@ -794,7 +684,6 @@ export default function AIChat() {
                       {att.type === "image" ? (
                         <img src={att.preview} alt={att.name} className="chat-attachment-thumb" />
                       ) : (
-                        <div className="chat-attachment-file-icon"><FileText size={16} /></div>
                         <div className="chat-attachment-file-icon"><FileText size={16} /></div>
                       )}
                       <div className="chat-attachment-info">
@@ -809,17 +698,6 @@ export default function AIChat() {
                 </div>
               )}
 
-              {/* ── Limit error ── */}
-              {limitError && (
-                <div className="chat-limit-error">
-                  <span>⚠ {limitError}</span>
-                  <button onClick={() => window.location.href = "/page/pricing"}>
-                    Upgrade →
-                  </button>
-                </div>
-              )}
-
-              {/* ── Limit error ── */}
               {limitError && (
                 <div className="chat-limit-error">
                   <span>⚠ {limitError}</span>
@@ -843,28 +721,16 @@ export default function AIChat() {
                   ref={textareaRef}
                   className="chat-input"
                   placeholder={chatLimitReached ? "Message limit reached — upgrade to continue…" : "Ask anything..."}
-                  placeholder={chatLimitReached ? "Message limit reached — upgrade to continue…" : "Ask anything..."}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={e => {
                     if (isLoading || chatLimitReached) return;
                     handleKeyDown(e);
                   }}
-                  onKeyDown={e => {
-                    if (isLoading || chatLimitReached) return;
-                    handleKeyDown(e);
-                  }}
                   rows={1}
-                  disabled={isLoading || chatLimitReached}
                   disabled={isLoading || chatLimitReached}
                 />
 
-                <button 
-                  className="chat-send-btn" 
-                  onClick={chatLimitReached ? () => router.push("/page/pricing") : (!isLoading && !chatLimitReached ? handleSend : undefined)} 
-                  disabled={!canSend || isLoading || chatLimitReached}
-                  title={chatLimitReached ? "Message limit reached — click to upgrade" : ""}
-                >
                 <button 
                   className="chat-send-btn" 
                   onClick={chatLimitReached ? () => router.push("/page/pricing") : (!isLoading && !chatLimitReached ? handleSend : undefined)} 

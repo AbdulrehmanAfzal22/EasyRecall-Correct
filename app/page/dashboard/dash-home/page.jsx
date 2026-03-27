@@ -80,7 +80,7 @@ export default function Dashboard() {
               Input once → recall repeatedly → remember efficiently.<br />
               Your AI-driven study companion that builds real memory.
             </p>
-            <button className="hero-btn">Get Started →</button>
+            <button className="hero-btn" onClick={() => router.push('/page/dashboard/content-intake')}>Get Started →</button>
           </div>
           <div className="hero-emoji">🧠</div>
         </div>
