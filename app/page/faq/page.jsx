@@ -137,7 +137,7 @@ export default function FAQ() {
   };
 
   return (
-    <div className="faq-section">
+    <div className="faq-section" id="faq-section">
       {/* Header */}
       <div className="faq-header">
         <div className="faq-badge">

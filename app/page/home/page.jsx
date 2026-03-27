@@ -74,8 +74,22 @@ export default function Hero() {
             </div>
 
             <div className="cta-group">
-              <button className="btn primary">Start Learning Now →</button>
-              <button className="btn secondary">See How It Works</button>
+              <button
+                className="btn primary"
+                onClick={() => window.location.href = "/page/signup"}
+              >
+                Start Learning Now →
+              </button>
+              <button
+                className="btn secondary"
+                onClick={() => {
+                  const faq = document.getElementById("faq-section");
+                  if (faq) faq.scrollIntoView({ behavior: "smooth" });
+                  else window.location.href = "/#faq-section";
+                }}
+              >
+                See How It Works
+              </button>
             </div>
           </div>
 

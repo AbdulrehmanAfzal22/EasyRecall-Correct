@@ -20,7 +20,7 @@ const NAV_ITEMS = [
   { label: "Flashcard Progress", href: "/page/dashboard/progress-flashcard", icon: BarChart2 },
   { label: "Quizzes", href: "/page/dashboard/quiz", icon: BrainCircuit },
   { label: "Content", href: "/page/dashboard/documents", icon: ClipboardList },
-  { label: "Topics", href: "/page/dashboard/segments", icon: HelpCircle },
+  { label: "Segments", href: "/page/dashboard/segments", icon: HelpCircle },
   { label: "Chat with AI", href: "/page/dashboard/chat-ai", icon: MessageCircle },
 ];
 

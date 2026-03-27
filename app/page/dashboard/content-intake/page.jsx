@@ -3,7 +3,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { FileText, Upload, FileCode, FileJson, BarChart3, Table } from "lucide-react";
 import { auth } from "../../../../lib/firebase";
-import { saveDocument } from "../../../../lib/service";
+import { saveDocument, loadDocuments } from "../../../../lib/service";
 import { saveFlashcards } from "@/lib/flashcardStore";
 import { saveQuiz } from "../../../../lib/quizStore";
 import { saveSegments } from "../../../../lib/segmentStore";
@@ -157,6 +157,25 @@ export default function ContentIntake() {
   const inputRef = useRef();
 
   const [inputMode,    setInputMode]    = useState("file");
+  const [documents, setDocuments] = useState([]);
+  const [loadingDocs, setLoadingDocs] = useState(false);
+    // Fetch uploaded documents on mount and when user changes
+    useEffect(() => {
+      const fetchDocs = async () => {
+        const uid = auth.currentUser?.uid;
+        if (!uid) return;
+        setLoadingDocs(true);
+        try {
+          const docs = await loadDocuments(uid);
+          setDocuments(docs);
+        } catch (e) {
+          console.error("Failed to load documents:", e);
+        } finally {
+          setLoadingDocs(false);
+        }
+      };
+      fetchDocs();
+    }, []);
   const [pastedText,   setPastedText]   = useState("");
   const [files,        setFiles]        = useState([]);
   const [rawFiles,     setRawFiles]     = useState([]);
@@ -367,6 +386,9 @@ export default function ContentIntake() {
             segments: segmentData?.groups ?? null,
             segmentStats: segmentData?.stats ?? null,
           });
+          // Refresh document list after upload
+          const docs = await loadDocuments(uid);
+          setDocuments(docs);
         } catch (e) {
           console.error("❌ Firebase save error:", e);
         } finally {
@@ -423,7 +445,31 @@ export default function ContentIntake() {
 
         {!done ? (
           <>
-            {/* ── Mode tabs ── */}
+            {/* ── Uploaded Documents List ── */}
+            {/* Uploaded Documents List: Only show if there are valid documents */}
+            {documents.filter(doc => (doc.fileName && doc.fileName !== "Pasted text") || doc.fileSize > 0).length > 0 && (
+              <div className="ci-documents-list">
+                <h3>Your Uploaded Documents</h3>
+                {loadingDocs ? (
+                  <div>Loading documents…</div>
+                ) : (
+                  <ul className="ci-documents-ul">
+                    {documents
+                      .filter(doc => (doc.fileName && doc.fileName !== "Pasted text") || doc.fileSize > 0)
+                      .map(doc => (
+                        <li key={doc.id} className="ci-documents-li">
+                          <div className="ci-documents-meta">
+                            <span className="ci-documents-title">{doc.fileName || doc.topic}</span>
+                            <span className="ci-documents-type">{doc.fileType?.toUpperCase()}</span>
+                            <span className="ci-documents-size">{formatSize(doc.fileSize)}</span>
+                          </div>
+                          <div className="ci-documents-date">{doc.createdAt?.toLocaleString?.() || ""}</div>
+                        </li>
+                      ))}
+                  </ul>
+                )}
+              </div>
+            )}
             <div className="ci-mode-tabs">
               <button
                 className={`ci-mode-tab ${inputMode === "file" ? "ci-mode-tab--active" : ""}`}
