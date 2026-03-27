@@ -1,0 +1,135 @@
+/* feature.css - aligned with FAQ color theme */
+
+.features {
+  padding: 80px 20px;
+  background: var(--faq-bg);
+  color: var(--faq-text);
+}
+
+.heading {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.heading-h1 {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 800;
+  color: var(--faq-text);
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+
+.heading-paragraph {
+  max-width: 720px;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--faq-text-faint);
+}
+
+.features-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.feature-card {
+  margin-top: 20px;
+  background: var(--faq-bg);
+  padding: 40px 30px;
+  border-radius: 20px;
+  flex: 1 1 320px;
+  max-width: 400px;
+  min-height: 380px;
+  border: 1px solid var(--faq-divider);
+  box-shadow: 0 2px 12px rgba(7, 18, 46, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(27, 63, 212, 0.12);
+}
+
+.dark .feature-card {
+  background: rgba(13, 21, 48, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.dark .feature-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.icon-box {
+  width: 55px;
+  height: 55px;
+  background: rgba(27, 63, 212, 0.1);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--faq-accent);
+  margin-bottom: 24px;
+  transition: background 0.2s;
+}
+
+.dark .icon-box {
+  background: rgba(43, 111, 255, 0.15);
+  color: var(--faq-accent);
+}
+
+.feature-card h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--faq-text);
+}
+
+.feature-card p {
+  font-size: 15px;
+  color: var(--faq-answer-color);
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.feature-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-card ul li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--faq-answer-color);
+  margin-bottom: 12px;
+}
+
+.feature-card ul li svg {
+  color: var(--faq-accent);
+  flex-shrink: 0;
+}
+
+/* Responsive tweaks */
+@media (max-width: 1024px) {
+  .features-container {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .features {
+    padding: 60px 16px;
+  }
+  .feature-card {
+    max-width: 100%;
+  }
+}

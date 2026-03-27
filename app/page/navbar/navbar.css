@@ -1,0 +1,505 @@
+/* Navbar.css */
+
+:root {
+  --faq-bg: #ffffff;
+  --faq-border: rgba(7, 18, 46, 0.1);
+  --faq-text: #07122e;
+  --faq-text-muted: #3a5080;
+  --faq-accent: #1a3fd4;
+  --faq-accent-hover: #0d2080;
+  --faq-green: #22c55e;
+  --faq-overlay-bg: #ffffff;
+}
+
+.dark {
+  --faq-bg: #060a1a;
+  --faq-border: rgba(255, 255, 255, 0.08);
+  --faq-text: #ddeaff;
+  --faq-text-muted: #6ab0f5;
+  --faq-accent: #2b6fff;
+  --faq-accent-hover: #3d7fff;
+  --faq-green: #4ade80;
+  --faq-overlay-bg: #060a1a;
+}
+
+/* ─── Base navbar ─────────────────────────────────── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--faq-bg);
+  border-bottom: 1px solid var(--faq-border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.navbar-inner {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ─── Logo ────────────────────────────────────────── */
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.logo-link {
+  display: block;
+  text-decoration: none;
+}
+
+.logo-image {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+.domain {
+  color: var(--faq-accent);
+  letter-spacing: 0.5px;
+  font-size: 20px;
+  font-weight: 600;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+/* ─── Desktop nav links ───────────────────────────── */
+.nav-links-desktop {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-link,
+.free-tools {
+  position: relative;
+  color: var(--faq-text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.14s ease;
+  padding-bottom: 6px;
+}
+
+.nav-link:hover,
+.free-tools:hover {
+  color: var(--faq-text);
+}
+
+.nav-link.active,
+.nav-link:hover {
+  color: var(--faq-text);
+}
+
+.nav-link.active::after,
+.nav-link:hover::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, var(--faq-accent), var(--faq-accent-hover), var(--faq-text-muted));
+  border-radius: 4px;
+  transform: translateX(-50%);
+  transition: width 0.28s ease, opacity 0.28s ease;
+}
+
+.nav-link.active::after {
+  width: 70%;
+  opacity: 1;
+}
+
+.nav-link:hover::after {
+  width: 55%;
+  opacity: 0.85;
+}
+
+/* ─── Free Tools badge ────────────────────────────── */
+.free-tools {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: default;
+}
+
+.green-dot {
+  color: var(--green);
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ─── Right section (desktop) ─────────────────────── */
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+/* ─── Theme toggle ────────────────────────────────── */
+.theme-btn {
+  background: none;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--faq-text-muted);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-btn:hover {
+  background: var(--faq-sidebar-hover-bg);
+  color: var(--faq-accent);
+}
+
+.dark .theme-btn:hover {
+  background: var(--faq-sidebar-active-bg);
+  color: var(--faq-accent);
+}
+
+/* ─── Sign in ─────────────────────────────────────── */
+.signin-link {
+  color: var(--faq-text-muted);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.14s ease;
+}
+
+.signin-link:hover {
+  color: var(--text);
+}
+
+/* ─── CTA button ──────────────────────────────────── */
+.cta-button {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: white;
+  background: var(--faq-accent);
+  padding: 10px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(27, 63, 212, 0.2);
+  white-space: nowrap;
+}
+
+.cta-button:hover {
+  background: var(--faq-accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(27, 63, 212, 0.35);
+}
+
+/* ─── Hamburger button ────────────────────────────── */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 8px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  gap: 5px;
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.hamburger-btn:hover {
+  background: var(--faq-sidebar-hover-bg);
+}
+
+.dark .hamburger-btn:hover {
+  background: var(--faq-sidebar-active-bg);
+}
+
+.hamburger-line {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--faq-text-muted);
+  border-radius: 2px;
+  transition: transform 0.28s ease, opacity 0.28s ease, width 0.28s ease;
+  transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburger-btn.open .hamburger-line:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-btn.open .hamburger-line:nth-child(2) {
+  opacity: 0;
+  width: 0;
+}
+
+.hamburger-btn.open .hamburger-line:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ─── Mobile Menu Overlay ─────────────────────────── */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--faq-overlay-bg);
+  z-index: 999;
+  flex-direction: column;
+  padding: 24px;
+  overflow-y: auto;
+
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.28s ease;
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Nav links inside mobile menu */
+.mobile-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.mobile-nav-link {
+  display: flex;
+  align-items: center;
+  color: var(--faq-text);
+  font-size: 17px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 14px 16px;
+  border-radius: 10px;
+  transition: background 0.15s ease, color 0.15s ease;
+  letter-spacing: 0.01em;
+}
+
+.mobile-nav-link:hover,
+.mobile-nav-link:active {
+  background: rgba(27, 63, 212, 0.08);
+  color: var(--blue);
+}
+
+.mobile-nav-link.active {
+  color: var(--blue);
+  background: rgba(27, 63, 212, 0.06);
+}
+
+/* Free tools row inside mobile menu */
+.mobile-free-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 500;
+  padding: 14px 16px;
+  border-radius: 10px;
+}
+
+/* Divider */
+.mobile-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 12px 0;
+}
+
+/* Bottom actions inside mobile menu */
+.mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.mobile-signin-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 12px 22px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  transition: background 0.15s ease;
+}
+
+.mobile-signin-link:hover {
+  background: rgba(27, 63, 212, 0.05);
+}
+
+.dark .mobile-signin-link:hover {
+  background: rgba(43, 111, 255, 0.1);
+}
+
+.mobile-cta-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background: var(--blue);
+  padding: 13px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.16s ease;
+  box-shadow: 0 1px 3px rgba(27, 63, 212, 0.2);
+}
+
+.mobile-cta-button:hover {
+  background: var(--blue-hover);
+  box-shadow: 0 4px 14px rgba(27, 63, 212, 0.35);
+}
+
+/* Prevent body scroll when menu is open */
+body.menu-open {
+  overflow: hidden;
+}
+
+/* ─────────────────────────────────────────────────── */
+/*  RESPONSIVE BREAKPOINTS                             */
+/* ─────────────────────────────────────────────────── */
+
+/* Large desktop (1200px+) */
+@media (min-width: 1200px) {
+  .navbar-container {
+    padding: 0 40px;
+  }
+
+  .nav-links-desktop {
+    gap: 36px;
+  }
+
+  .right-section {
+    gap: 24px;
+  }
+}
+
+/* Tablet landscape + small laptop (769px – 1024px) */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .navbar-container {
+    padding: 0 20px;
+  }
+
+  .nav-links-desktop {
+    gap: 20px;
+  }
+
+  .nav-link,
+  .free-tools {
+    font-size: 14px;
+  }
+
+  .right-section {
+    gap: 14px;
+  }
+
+  .cta-button {
+    font-size: 13.5px;
+    padding: 9px 16px;
+  }
+
+  .signin-link {
+    font-size: 14px;
+  }
+}
+
+/* Tablet portrait + mobile (≤768px) */
+@media (max-width: 768px) {
+  .nav-links-desktop {
+    display: none;
+  }
+
+  .signin-link,
+  .cta-button {
+    display: none;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .mobile-menu {
+    display: flex;
+  }
+
+  .right-section {
+    gap: 8px;
+  }
+
+  .navbar-container {
+    padding: 0 16px;
+  }
+}
+
+/* Small mobile (≤480px) */
+@media (max-width: 480px) {
+  .navbar-inner {
+    height: 64px;
+  }
+
+  .mobile-menu {
+    top: 64px;
+    padding: 20px 16px;
+  }
+
+  .domain {
+    font-size: 18px;
+  }
+
+  .logo-image {
+    height: 32px;
+  }
+
+  .mobile-nav-link {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+}
+
+/* Very small screens (≤360px) */
+@media (max-width: 360px) {
+  .domain {
+    font-size: 16px;
+  }
+
+  .logo-image {
+    height: 28px;
+  }
+
+  .hamburger-btn {
+    width: 36px;
+    height: 36px;
+  }
+}

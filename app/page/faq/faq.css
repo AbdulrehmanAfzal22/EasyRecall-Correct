@@ -1,0 +1,473 @@
+/* =================================== 
+   CSS VARIABLES — light (default) / dark 
+=================================== */
+:root {
+  --faq-bg:                         #ffffff;
+  --faq-text:                       #07122e;
+  --faq-text-muted:                 #3a5080;
+  --faq-text-faint:                 rgba(7, 18, 46, 0.5);
+  --faq-accent:                     #1a3fd4;
+  --faq-accent-hover:               #0d2080;
+  --faq-divider:                    rgba(7, 18, 46, 0.1);
+  --faq-answer-color:               rgba(7, 18, 46, 0.6);
+  --faq-chevron:                    rgba(7, 18, 46, 0.35);
+  --faq-chevron-open:               rgba(7, 18, 46, 0.6);
+  --faq-sidebar-color:              rgba(7, 18, 46, 0.4);
+  --faq-sidebar-hover-bg:           rgba(27, 63, 212, 0.05);
+  --faq-sidebar-active-bg:          rgba(27, 63, 212, 0.08);
+  --faq-sidebar-pill-border:        rgba(7, 18, 46, 0.15);
+  --faq-sidebar-pill-active-border: rgba(27, 63, 212, 0.4);
+  /* Contact strip — light mode */
+  --faq-contact-bg:                 #ffffff;
+  --faq-contact-text:               #07122e;
+  --faq-contact-subtext:            #3a5080;
+}
+
+.dark {
+  --faq-bg:                         #060a1a;
+  --faq-text:                       #ddeaff;
+  --faq-text-muted:                 #6ab0f5;
+  --faq-text-faint:                 rgba(221, 234, 255, 0.5);
+  --faq-accent:                     #2b6fff;
+  --faq-accent-hover:               #3d7fff;
+  --faq-divider:                    rgba(255, 255, 255, 0.08);
+  --faq-answer-color:               rgba(221, 234, 255, 0.55);
+  --faq-chevron:                    rgba(255, 255, 255, 0.4);
+  --faq-chevron-open:               rgba(255, 255, 255, 0.7);
+  --faq-sidebar-color:              rgba(255, 255, 255, 0.45);
+  --faq-sidebar-hover-bg:           rgba(43, 111, 255, 0.08);
+  --faq-sidebar-active-bg:          rgba(43, 111, 255, 0.12);
+  --faq-sidebar-pill-border:        rgba(255, 255, 255, 0.1);
+  --faq-sidebar-pill-active-border: rgba(43, 111, 255, 0.4);
+  /* Contact strip — dark mode */
+  --faq-contact-bg:                 #060a1a;
+  --faq-contact-text:               #ddeaff;
+  --faq-contact-subtext:            rgba(221, 234, 255, 0.55);
+}
+
+/* =================================== FAQ SECTION =================================== */
+.faq-section {
+  background-color: var(--faq-bg);
+  min-height: 100vh;
+  width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--faq-text);
+  padding: 64px 0 0;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* =================================== HEADER =================================== */
+.faq-header {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 56px;
+  padding: 0 24px;
+}
+
+.faq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--faq-accent);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+
+.faq-title {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  color: var(--faq-text);
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+
+.faq-subtitle {
+  color: var(--faq-text-faint);
+  font-size: clamp(14px, 1.8vw, 16px);
+  line-height: 1.6;
+}
+
+/* =================================== BODY LAYOUT =================================== */
+.faq-body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+  display: flex;
+  gap: 80px;
+  align-items: flex-start;
+}
+
+/* =================================== SIDEBAR =================================== */
+.faq-sidebar {
+  flex-shrink: 0;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  position: sticky;
+  top: 32px;
+}
+
+.faq-sidebar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--faq-sidebar-color);
+  font-size: 14px;
+  font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease, background 0.2s ease;
+  width: 100%;
+  white-space: nowrap;
+}
+
+.faq-sidebar-btn:hover {
+  color: var(--faq-text);
+  background: var(--faq-sidebar-hover-bg);
+}
+
+.faq-sidebar-btn.active {
+  color: var(--faq-accent);
+  background: transparent;
+  font-weight: 500;
+}
+
+.sidebar-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.faq-sidebar-btn.active .sidebar-icon {
+  opacity: 1;
+  color: var(--faq-accent);
+}
+
+/* =================================== QUESTIONS PANEL =================================== */
+.faq-questions {
+  flex: 1;
+  min-width: 0;
+}
+
+/* =================================== FAQ ITEM — accordion =================================== */
+.faq-item {
+  position: relative;
+}
+
+.faq-question {
+  width: 100%;
+  color: var(--faq-text);
+  cursor: pointer;
+  text-align: left;
+  background: none;
+  border: none;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 35px 0;
+  font-family: inherit;
+  font-size: clamp(15px, 1.8vw, 17px);
+  font-weight: 500;
+  line-height: 1.4;
+  transition: color 0.2s;
+  display: flex;
+}
+
+.faq-question:hover {
+  color: var(--faq-text-muted);
+}
+
+.faq-item.open .faq-question {
+  color: var(--faq-text);
+}
+
+/* Chevron */
+.faq-chevron {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--faq-chevron);
+  transition: transform 0.3s ease, color 0.2s ease;
+}
+
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+  color: var(--faq-chevron-open);
+}
+
+/* Answer — smooth accordion */
+.faq-answer {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.35s ease;
+}
+
+.faq-item.open .faq-answer {
+  max-height: 300px;
+}
+
+.faq-answer-inner {
+  padding: 0 0 22px 0;
+  color: var(--faq-answer-color);
+  font-size: clamp(14px, 1.6vw, 15px);
+  line-height: 1.7;
+}
+
+/* Divider */
+.faq-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--faq-divider);
+}
+
+/* =================================== CONTACT STRIP =================================== */
+.faq-contact {
+  margin-top: 80px;
+  background: var(--faq-contact-bg);
+  transition: background-color 0.25s ease;
+}
+
+.faq-contact-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 72px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+}
+
+.faq-contact-title {
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 700;
+  color: var(--faq-contact-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.faq-contact-text {
+  font-size: clamp(14px, 1.6vw, 16px);
+  color: var(--faq-contact-subtext);
+  line-height: 1.6;
+  margin: 0 0 8px;
+  max-width: 440px;
+}
+
+.faq-contact-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--faq-accent);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 12px 26px;
+  border-radius: 10px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 2px 8px rgba(27, 63, 212, 0.3);
+}
+
+.faq-contact-btn:hover {
+  background: var(--faq-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(27, 63, 212, 0.4);
+}
+
+.faq-contact-btn svg {
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.faq-contact-btn:hover svg {
+  transform: translateX(3px);
+}
+
+/* =================================== RESPONSIVE — Tablet =================================== */
+@media (max-width: 1024px) {
+  .faq-body {
+    gap: 48px;
+    padding: 0 24px;
+  }
+
+  .faq-sidebar {
+    width: 180px;
+  }
+
+  .faq-contact-inner {
+    padding: 60px 24px;
+  }
+}
+
+/* =================================== RESPONSIVE — Mobile (max 768px) =================================== */
+@media (max-width: 768px) {
+  .faq-section {
+    padding: 48px 0 0;
+  }
+
+  .faq-header {
+    margin-bottom: 40px;
+    padding: 0 20px;
+  }
+
+  .faq-body {
+    flex-direction: column;
+    gap: 32px;
+    padding: 0 20px;
+  }
+
+  .faq-sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    position: static;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .faq-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .faq-sidebar-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--faq-sidebar-pill-border);
+    font-size: 13px;
+    width: auto;
+  }
+
+  .faq-sidebar-btn:hover {
+    background: var(--faq-sidebar-hover-bg);
+  }
+
+  .faq-sidebar-btn.active {
+    background: var(--faq-sidebar-active-bg);
+    border-color: var(--faq-sidebar-pill-active-border);
+    color: var(--faq-accent);
+  }
+
+  .sidebar-icon {
+    display: none;
+  }
+
+  .faq-questions {
+    width: 100%;
+  }
+
+  .faq-contact {
+    margin-top: 56px;
+  }
+
+  .faq-contact-inner {
+    padding: 52px 20px;
+  }
+}
+
+/* =================================== RESPONSIVE — Small mobile (480px) =================================== */
+@media (max-width: 480px) {
+  .faq-section {
+    padding: 36px 0 0;
+  }
+
+  .faq-header {
+    margin-bottom: 32px;
+    padding: 0 16px;
+  }
+
+  .faq-body {
+    padding: 0 16px;
+    gap: 24px;
+  }
+
+  .faq-question {
+    padding: 18px 0;
+    font-size: 15px;
+  }
+
+  .faq-answer-inner {
+    font-size: 14px;
+    padding-bottom: 18px;
+  }
+
+  .faq-contact {
+    margin-top: 40px;
+  }
+
+  .faq-contact-inner {
+    padding: 44px 16px;
+    gap: 10px;
+  }
+
+  .faq-contact-btn {
+    font-size: 14px;
+    padding: 12px 22px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* =================================== RESPONSIVE — Extra small (360px) =================================== */
+@media (max-width: 360px) {
+  .faq-body {
+    padding: 0 12px;
+  }
+
+  .faq-sidebar-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+  }
+
+  .faq-question {
+    font-size: 14px;
+  }
+
+  .faq-contact-inner {
+    padding: 36px 12px;
+  }
+}
+
+/* =================================== ACCESSIBILITY =================================== */
+.faq-question:focus-visible {
+  outline: 2px solid var(--faq-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.faq-sidebar-btn:focus-visible,
+.faq-contact-btn:focus-visible {
+  outline: 2px solid var(--faq-accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-answer,
+  .faq-chevron,
+  .faq-sidebar-btn,
+  .faq-question,
+  .faq-section,
+  .faq-contact,
+  .faq-contact-btn,
+  .faq-contact-btn svg {
+    transition: none;
+  }
+}

@@ -1,0 +1,479 @@
+/* flashcard.css — full replacement with dark/light theme support */
+
+/* ─── CSS Variables ────────────────────────────────────────────────────── */
+
+:root {
+  --fc-bg-page:           #f8f7ff;
+  --fc-bg-empty-card:     #ffffff;
+  --fc-border-empty-card: rgba(0, 0, 0, 0.08);
+  --fc-empty-h2:          #0f172a;
+  --fc-empty-p:           #64748b;
+
+  --fc-progress-track:    rgba(0, 0, 0, 0.07);
+  --fc-progress-fill-from:#6366f1;
+  --fc-progress-fill-to:  #4f46e5;
+  --fc-pct-label:         #94a3b8;
+
+  --fc-dot-inactive:      rgba(0, 0, 0, 0.12);
+  --fc-dot-active:        #6366f1;
+
+  --fc-card-front-from:   #818cf8;
+  --fc-card-front-mid:    #6366f1;
+  --fc-card-front-to:     #4f46e5;
+  --fc-card-shadow:       rgba(79, 70, 229, 0.28);
+
+  --fc-ratings-heading:   #94a3b8;
+  --fc-rate-btn-hover:    brightness(1.1);
+
+  --fc-post-rate-bg:      transparent;
+
+  --fc-nav-btn-bg:        rgba(0, 0, 0, 0.04);
+  --fc-nav-btn-border:    rgba(0, 0, 0, 0.1);
+  --fc-nav-btn-color:     #64748b;
+  --fc-nav-btn-hover-bg:  rgba(0, 0, 0, 0.08);
+  --fc-nav-btn-hover-color:#0f172a;
+
+  --fc-scene-slide-color: #0f172a;
+}
+
+/* ─── DARK THEME ────────────────────────────────────────────────────────── */
+
+.dark {
+  --fc-bg-page:           #060b18;
+  --fc-bg-empty-card:     rgba(255, 255, 255, 0.03);
+  --fc-border-empty-card: rgba(255, 255, 255, 0.08);
+  --fc-empty-h2:          #ffffff;
+  --fc-empty-p:           rgba(255, 255, 255, 0.45);
+
+  --fc-progress-track:    rgba(255, 255, 255, 0.08);
+  --fc-progress-fill-from:#9b59f5;
+  --fc-progress-fill-to:  #7c3aed;
+  --fc-pct-label:         rgba(255, 255, 255, 0.35);
+
+  --fc-dot-inactive:      rgba(255, 255, 255, 0.15);
+  --fc-dot-active:        #a78bfa;
+
+  --fc-card-front-from:   #9b59f5;
+  --fc-card-front-mid:    #7c3aed;
+  --fc-card-front-to:     #6025c4;
+  --fc-card-shadow:       rgba(100, 40, 200, 0.32);
+
+  --fc-ratings-heading:   rgba(255, 255, 255, 0.35);
+
+  --fc-nav-btn-bg:        rgba(255, 255, 255, 0.05);
+  --fc-nav-btn-border:    rgba(255, 255, 255, 0.1);
+  --fc-nav-btn-color:     rgba(255, 255, 255, 0.55);
+  --fc-nav-btn-hover-bg:  rgba(255, 255, 255, 0.1);
+  --fc-nav-btn-hover-color:#ffffff;
+}
+
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+
+.fc-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding-bottom: 60px;
+}
+
+/* ── Empty state ────────────────────────────────────────────────────────── */
+
+.fc-empty-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+}
+
+.fc-empty-card {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px;
+  background: var(--fc-bg-empty-card);
+  border: 1px solid var(--fc-border-empty-card);
+  border-radius: 24px;
+  max-width: 360px;
+  transition: background 0.25s ease, border-color 0.25s ease;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+}
+
+.dark .fc-empty-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.fc-empty-icon    { font-size: 52px; }
+.fc-empty-card h2 { font-size: 20px; font-weight: 700; color: var(--fc-empty-h2); transition: color 0.25s ease; }
+.fc-empty-card p  { font-size: 14px; color: var(--fc-empty-p); transition: color 0.25s ease; }
+
+/* ── Header progress bar ────────────────────────────────────────────────── */
+
+.fc-header-bar {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fc-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fc-progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--fc-progress-track);
+  border-radius: 99px;
+  overflow: hidden;
+  transition: background 0.25s ease;
+}
+
+.fc-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--fc-progress-fill-from), var(--fc-progress-fill-to));
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fc-pct-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--fc-pct-label);
+  min-width: 36px;
+  text-align: right;
+  transition: color 0.25s ease;
+}
+
+/* ── Dot indicators ─────────────────────────────────────────────────────── */
+
+.fc-dots-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.fc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 0;
+}
+
+.fc-dot--active {
+  width: 22px;
+  border-radius: 99px;
+}
+
+/* ── Card scene (for slide animation) ──────────────────────────────────── */
+
+.fc-scene {
+  width: 100%;
+  max-width: 480px;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+}
+
+.fc-scene--sliding {
+  opacity: 0;
+  transform: translateX(28px);
+}
+
+/* ── Card wrapper & flip ────────────────────────────────────────────────── */
+
+.fc-wrapper {
+  width: 320px;
+  height: 280px;
+  perspective: 1200px;
+}
+
+.fc-wrapper--page {
+  width: 100%;
+  height: 300px;
+}
+
+.fc-card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+  border-radius: 24px;
+}
+
+.fc-card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+/* ── Card faces ─────────────────────────────────────────────────────────── */
+
+.fc-front,
+.fc-back {
+  backface-visibility: hidden;
+  background: linear-gradient(
+    150deg,
+    var(--fc-card-front-from) 0%,
+    var(--fc-card-front-mid)  45%,
+    var(--fc-card-front-to)   100%
+  );
+  border-radius: 24px;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 30px;
+  display: flex;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  width: 100%;
+  box-shadow:
+    0 24px 64px var(--fc-card-shadow),
+    0 6px 20px rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.25s ease;
+}
+
+.fc-front::before, .fc-back::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+}
+
+.fc-front::after, .fc-back::after {
+  content: '';
+  position: absolute;
+  bottom: -50px; left: -40px;
+  width: 160px; height: 160px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+
+.fc-back { transform: rotateY(180deg); }
+
+/* ── Card typography ────────────────────────────────────────────────────── */
+
+.fc-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.fc-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  margin-bottom: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.fc-title--answer {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+/* ── Flip button ────────────────────────────────────────────────────────── */
+
+.fc-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 11px 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(6px);
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+}
+
+.fc-button:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+/* ── Rating block ───────────────────────────────────────────────────────── */
+
+.fc-ratings-block {
+  width: 100%;
+  max-width: 480px;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fc-ratings-block--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.fc-ratings-heading {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--fc-ratings-heading);
+  text-align: center;
+  margin-bottom: 12px;
+  transition: color 0.25s ease;
+}
+
+.fc-ratings-row {
+  display: flex;
+  gap: 10px;
+}
+
+/* Each rating button */
+.fc-rate-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 16px 8px;
+  background: var(--rbg);
+  border: 1.5px solid var(--rbd);
+  border-radius: 16px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.fc-rate-btn:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.15);
+}
+
+/* Light mode: rate buttons need a subtle background since page bg is light */
+:root .fc-rate-btn {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.fc-rate-btn--selected {
+  border-color: var(--rc);
+  box-shadow: 0 0 0 2px var(--rc), 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px) scale(1.03);
+}
+
+.fc-rate-btn--faded { opacity: 0.35; }
+
+.fc-rate-emoji { font-size: 24px; line-height: 1; }
+
+.fc-rate-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--rc);
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ── Post-rate row ──────────────────────────────────────────────────────── */
+
+.fc-post-rate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 0 2px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.fc-rated-badge {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Nav row ────────────────────────────────────────────────────────────── */
+
+.fc-nav-row {
+  display: flex;
+  gap: 10px;
+}
+
+.fc-nav-btn {
+  background: var(--fc-nav-btn-bg);
+  border: 1px solid var(--fc-nav-btn-border);
+  color: var(--fc-nav-btn-color);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.fc-nav-btn:hover:not(:disabled) {
+  background: var(--fc-nav-btn-hover-bg);
+  color: var(--fc-nav-btn-hover-color);
+  border-color: transparent;
+}
+
+.fc-nav-btn:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+/* ── Shared button helpers ──────────────────────────────────────────────── */
+
+.ci-btn-sm {
+  padding: 8px 16px;
+  font-size: 13px;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Light mode overrides for topbar text ──────────────────────────────── */
+
+:root .fc-page .fc-header-bar,
+:root .fc-page .fc-nav-row,
+:root .fc-page .fc-ratings-block {
+  /* already handled by CSS vars, nothing extra needed */
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  .fc-wrapper--page { height: 260px; }
+  .fc-front, .fc-back { padding: 22px 20px; }
+  .fc-title { font-size: 20px; }
+  .fc-title--answer { font-size: 16px; }
+  .fc-ratings-row { gap: 6px; }
+  .fc-rate-btn { padding: 12px 6px; }
+  .fc-rate-emoji { font-size: 20px; }
+  .fc-rate-label { font-size: 10px; }
+}

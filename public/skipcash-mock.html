@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Skipcash Mock Checkout</title>
+    <style>
+      body { font-family: Arial, sans-serif; padding: 2rem; }
+      .box { border: 1px solid #ddd; padding: 1rem; border-radius: 8px; }
+      label { font-weight: bold; }
+      .params { margin-top: 1rem; }
+      .btn { margin-top: 1rem; padding: 0.6rem 1rem; background:#0070f3;color:#fff;border:none;border-radius:6px;cursor:pointer }
+    </style>
+  </head>
+  <body>
+    <h1>Skipcash Mock Checkout</h1>
+    <p>This page simulates the external checkout provider so you can test the redirect flow locally.</p>
+
+    <div class="box">
+      <div><label>Query parameters received:</label></div>
+      <pre id="params" class="params"></pre>
+
+      <button id="complete" class="btn">Simulate Successful Payment</button>
+      <button id="cancel" class="btn" style="background:#888;margin-left:8px">Simulate Cancel</button>
+    </div>
+
+    <script>
+      function parseQuery() {
+        const qs = location.search.replace(/^\?/, '');
+        const params = {};
+        qs.split('&').forEach(pair => {
+          if (!pair) return;
+          const [k,v] = pair.split('=');
+          params[decodeURIComponent(k)] = decodeURIComponent(v || '');
+        });
+        return params;
+      }
+
+      const params = parseQuery();
+      document.getElementById('params').textContent = JSON.stringify(params, null, 2);
+
+      document.getElementById('complete').addEventListener('click', () => {
+        // Redirect back to app with a fake success token
+        const returnTo = params.return_url || '/page/dashboard';
+        const url = new URL(location.origin + returnTo);
+        // Only set status if not already in URL
+        if (!url.searchParams.has('skipcash_status')) {
+          url.searchParams.set('skipcash_status', 'success');
+        }
+        url.searchParams.set('skipcash_tx', 'MOCKTX-' + Math.random().toString(36).slice(2,10));
+        location.href = url.toString();
+      });
+
+      document.getElementById('cancel').addEventListener('click', () => {
+        const returnTo = params.return_url || '/page/dashboard';
+        const url = new URL(location.origin + returnTo);
+        // Only set status if not already in URL
+        if (!url.searchParams.has('skipcash_status')) {
+          url.searchParams.set('skipcash_status', 'cancel');
+        }
+        location.href = url.toString();
+      });
+    </script>
+  </body>
+</html>

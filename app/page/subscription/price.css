@@ -1,0 +1,312 @@
+/* ===================================
+   COLOR SYNC WITH FAQ THEME
+=================================== */
+
+:root {
+  /* FAQ theme variables */
+  --faq-bg: #ffffff;
+  --faq-card: #f0f4ff;
+  --faq-text: #07122e;
+  --faq-text-muted: #3a5080;
+  --faq-accent: #1a3fd4;
+  --faq-accent-hover: #0d2080;
+  --faq-divider: rgba(7, 18, 46, 0.1);
+  --faq-shadow: 0 6px 20px -8px rgba(27, 63, 212, 0.18);
+  --faq-shadow-hover: 0 12px 32px -10px rgba(27, 63, 212, 0.28);
+
+  /* Map pricing variables to FAQ theme */
+  --bg: var(--faq-bg);
+  --text: var(--faq-text);
+  --text-soft: var(--faq-text-muted);
+  --border: var(--faq-divider);
+}
+
+.dark {
+  --faq-bg: #060a1a;
+  --faq-card: #0d1530;
+  --faq-text: #ddeaff;
+  --faq-text-muted: #6ab0f5;
+  --faq-accent: #2b6fff;
+  --faq-accent-hover: #3d7fff;
+  --faq-divider: rgba(255, 255, 255, 0.08);
+  --faq-shadow: 0 6px 20px -8px rgba(43, 111, 255, 0.25);
+  --faq-shadow-hover: 0 12px 32px -10px rgba(43, 111, 255, 0.35);
+
+  /* Map pricing variables to FAQ theme */
+  --bg: var(--faq-bg);
+  --text: var(--faq-text);
+  --text-soft: var(--faq-text-muted);
+  --border: var(--faq-divider);
+}
+
+/* ===================================
+   PRICING HERO
+=================================== */
+
+.pricing-hero {
+  background: var(--bg);
+  padding: 80px 20px;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+}
+
+.pricing-standalone {
+  position: relative;
+}
+
+.pricing-back-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--faq-divider);
+  background: var(--faq-card);
+  color: var(--faq-text);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.dark .pricing-back-btn {
+  background: var(--faq-card);
+  color: var(--faq-text);
+}
+
+.pricing-back-btn:hover {
+  background: var(--faq-bg);
+}
+
+.pricing-wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  text-align: center;
+  width: 100%;
+}
+
+.main-title {
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--faq-text);
+  margin-bottom: 8px;
+}
+
+.main-subtitle {
+  font-size: 1.02rem;
+  color: var(--faq-text-muted);
+  margin-bottom: 48px;
+}
+
+/* ===================================
+   CARDS GRID
+=================================== */
+
+.pricing-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: stretch;
+}
+
+/* ===================================
+   CARD BASE
+=================================== */
+
+.pricing-card-monthly,
+.pricing-card-yearly {
+  background: var(--faq-card);
+  border: 1px solid var(--faq-divider);
+  box-shadow: var(--faq-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  padding: 28px;
+  border-radius: 14px;
+}
+
+.pricing-card-monthly:hover,
+.pricing-card-yearly:hover {
+  box-shadow: var(--faq-shadow-hover);
+  transform: translateY(-4px);
+}
+
+/* Highlight yearly card */
+
+.pricing-card-yearly {
+  border-color: var(--faq-accent);
+  box-shadow: 0 0 0 2px var(--faq-accent), var(--faq-shadow);
+}
+
+.pricing-card-yearly:hover {
+  box-shadow: 0 0 0 2px var(--faq-accent), var(--faq-shadow-hover);
+}
+
+/* ===================================
+   CARD HEADER
+=================================== */
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.plan-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--faq-text);
+}
+
+.badge-recommended {
+  background: var(--faq-accent);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+
+.badge-popular {
+  background: var(--faq-accent-hover);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 999px;
+}
+
+/* ===================================
+   PRICE
+=================================== */
+
+.price-block {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  margin-bottom: 28px;
+  gap: 4px;
+}
+
+.currency {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--faq-text);
+}
+
+.amount {
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 0.9;
+  color: var(--faq-text);
+}
+
+.billing-period {
+  font-size: 1.1rem;
+  color: var(--faq-text-muted);
+  font-weight: 500;
+}
+
+/* ===================================
+   FEATURES
+=================================== */
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px 0;
+  flex: 1;
+}
+
+.feature-list li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 10px;
+  font-size: 0.96rem;
+  color: var(--faq-text-muted);
+  line-height: 1.45;
+}
+
+.feature-list li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--faq-accent);
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* ===================================
+   LIMITS
+=================================== */
+
+.limits-section {
+  border-top: 1px solid var(--faq-divider);
+  padding-top: 20px;
+  margin-bottom: 28px;
+}
+
+.limit-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.94rem;
+  color: var(--faq-text-muted);
+  margin-bottom: 8px;
+}
+
+.limit-row span:last-child {
+  font-weight: 600;
+  color: var(--faq-text);
+}
+
+/* ===================================
+   BUTTON
+=================================== */
+
+.start-button {
+  width: 100%;
+  background: var(--faq-accent);
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: auto;
+  box-shadow: 0 4px 14px rgba(27, 63, 212, 0.3);
+}
+
+.start-button:hover {
+  background: var(--faq-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(27, 63, 212, 0.42);
+}
+
+/* ===================================
+   MOBILE
+=================================== */
+
+@media (max-width: 700px) {
+
+  .pricing-hero {
+    padding: 60px 16px;
+  }
+
+  .main-title {
+    font-size: 1.9rem;
+  }
+
+  .amount {
+    font-size: 2.8rem;
+  }
+
+  .pricing-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

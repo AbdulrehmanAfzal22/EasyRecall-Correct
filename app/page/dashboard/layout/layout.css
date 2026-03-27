@@ -1,0 +1,37 @@
+/* ── Replace your dashboard layout styles with these ── */
+
+:root {
+  --main-bg: #f8fafc;
+  --text-color: #0f172a;
+}
+
+.dark {
+  --main-bg: #0f172a;
+  --text-color: #f1f5f9;
+}
+
+/* Shell is exactly viewport height, no overflow */
+.dashboard-shell {
+  display: flex;
+  height: 100vh;          /* ← was min-height, now fixed */
+  overflow: hidden;       /* ← prevent shell itself from scrolling */
+  background: var(--main-bg);
+  color: var(--text-color);
+}
+
+/* Main scrolls independently inside the fixed shell */
+.dashboard-main {
+  flex: 1;
+  min-width: 0;
+  padding: 40px;
+  overflow-y: auto;       /* only this panel scrolls */
+  height: 100vh;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-main { padding: 32px 28px; }
+}
+
+@media (max-width: 768px) {
+  .dashboard-main { padding: 24px 16px; }
+}
