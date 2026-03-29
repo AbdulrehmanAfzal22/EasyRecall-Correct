@@ -104,13 +104,15 @@ Each flashcard:
 
 Order: foundational → complex.
 
+IMPORTANT: If you are asked to generate flashcards for the same content multiple times, always use different questions, different wording, or focus on different details. Do not repeat the same set as before. Add variety and creativity every time.
+
 Study Material:
 ${cleanContent}
 
 Return ONLY valid JSON:
 { "flashcards": [{ "question": "...", "answer": "...", "reference": "..." }] }`,
             }],
-            temperature: 0.5,
+            temperature: 0.7,
             max_tokens: 4000,
             response_format: { type: "json_object" },
           }),
@@ -130,6 +132,8 @@ MCQ: 4 options (A/B/C/D), exactly one correct answer, plausible distractors
 True/False: clear factual statements, balanced mix of true/false
 Short Answer: questions answerable in 1–3 sentences, include a model answer for scoring
 For every question, also include a "reference" field: a short reference to the relevant section, fact, or page in the study material (e.g., a heading, section title, or quoted phrase).
+
+IMPORTANT: If you are asked to generate a quiz for the same content multiple times, always use different questions, different wording, or focus on different details. Do not repeat the same set as before. Add variety and creativity every time.
 
 Study Material:
 ${cleanContent}
@@ -166,7 +170,7 @@ Return ONLY valid JSON — no markdown:
   ]
 }`,
             }],
-            temperature: 0.6,
+            temperature: 0.7,
             max_tokens: 4000,
             response_format: { type: "json_object" },
           }),
@@ -246,19 +250,21 @@ Return ONLY valid JSON — no markdown:
           role: "user",
           content: `You are an expert educator. Given the study material chunk below${fileNames ? ` from "${fileNames}"` : ""}, create exactly ${cardsForChunk} high-quality flashcards.
 
-Each flashcard:
-- "question": Clear, focused question testing one concept
-- "answer": Concise accurate answer (1–3 sentences)
+      Each flashcard:
+      - "question": Clear, focused question testing one concept
+      - "answer": Concise accurate answer (1–3 sentences)
 
-Make the flashcards within this chunk internally coherent and non-duplicative.
+      Make the flashcards within this chunk internally coherent and non-duplicative.
 
-Study Material Chunk:
-${chunkText}
+      IMPORTANT: If you are asked to generate flashcards for the same content multiple times, always use different questions, different wording, or focus on different details. Do not repeat the same set as before. Add variety and creativity every time.
 
-Return ONLY valid JSON:
-{ "flashcards": [{ "question": "...", "answer": "..." }] }`,
+      Study Material Chunk:
+      ${chunkText}
+
+      Return ONLY valid JSON:
+      { "flashcards": [{ "question": "...", "answer": "..." }] }`,
         }],
-        temperature: 0.5,
+        temperature: 0.7,
         max_tokens: 2000,
         response_format: { type: "json_object" },
       });

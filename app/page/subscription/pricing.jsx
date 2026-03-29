@@ -107,7 +107,8 @@ export default function SubscriptionPricing() {
           {/* Yearly Card */}
           <div className="pricing-card-yearly">
             <div className="card-header">
-              <h3 className="plan-title">Premium Yearly</h3>
+              <h3 className="plan-title">Premium Monthly
+              </h3>
               <span className="badge-recommended">Save 20%</span>
             </div>
 

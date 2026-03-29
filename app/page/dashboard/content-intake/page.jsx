@@ -252,14 +252,17 @@ export default function ContentIntake() {
     addFiles(e.dataTransfer.files);
   }, []);
 
+  // Only allow one file at a time
   const addFiles = (incoming) => {
     const arr  = Array.from(incoming);
-    const meta = arr.map((f) => ({
+    if (arr.length === 0) return;
+    const f = arr[0];
+    const meta = [{
       id:   Math.random().toString(36).slice(2),
       name: f.name, size: formatSize(f.size), ...getFileType(f.name),
-    }));
-    setFiles((prev) => [...prev, ...meta]);
-    setRawFiles((prev) => [...prev, ...arr]);
+    }];
+    setFiles(meta);
+    setRawFiles([f]);
     setDone(false); setError("");
   };
 
@@ -410,9 +413,10 @@ export default function ContentIntake() {
     }
   };
 
+  // Only allow generate if exactly one file or pasted text
   const canGenerate = inputMode === "text"
     ? pastedText.trim().length > 0
-    : files.length > 0;
+    : files.length === 1;
 
   const uploadLimitReached = usageInfo && usageInfo.uploads === 0 && usageInfo.uploads !== Infinity;
 
@@ -445,31 +449,7 @@ export default function ContentIntake() {
 
         {!done ? (
           <>
-            {/* ── Uploaded Documents List ── */}
-            {/* Uploaded Documents List: Only show if there are valid documents */}
-            {documents.filter(doc => (doc.fileName && doc.fileName !== "Pasted text") || doc.fileSize > 0).length > 0 && (
-              <div className="ci-documents-list">
-                <h3>Your Uploaded Documents</h3>
-                {loadingDocs ? (
-                  <div>Loading documents…</div>
-                ) : (
-                  <ul className="ci-documents-ul">
-                    {documents
-                      .filter(doc => (doc.fileName && doc.fileName !== "Pasted text") || doc.fileSize > 0)
-                      .map(doc => (
-                        <li key={doc.id} className="ci-documents-li">
-                          <div className="ci-documents-meta">
-                            <span className="ci-documents-title">{doc.fileName || doc.topic}</span>
-                            <span className="ci-documents-type">{doc.fileType?.toUpperCase()}</span>
-                            <span className="ci-documents-size">{formatSize(doc.fileSize)}</span>
-                          </div>
-                          <div className="ci-documents-date">{doc.createdAt?.toLocaleString?.() || ""}</div>
-                        </li>
-                      ))}
-                  </ul>
-                )}
-              </div>
-            )}
+            {/* Removed 'Your Uploaded Document' and meta info. Uploaded file will remain visible in uploader below until user clicks 'Upload new content'. */}
             <div className="ci-mode-tabs">
               <button
                 className={`ci-mode-tab ${inputMode === "file" ? "ci-mode-tab--active" : ""}`}
@@ -520,7 +500,7 @@ export default function ContentIntake() {
                         or{" "}
                         <button className="ci-drop-browse-link"
                           onClick={(e) => { e.stopPropagation(); openPicker(); }}>
-                          browse files
+                          browse file
                         </button>{" "}
                         from your computer
                       </div>
@@ -552,11 +532,7 @@ export default function ContentIntake() {
                           <div className="ci-file-size">{f.size}</div>
                         </div>
                       ))}
-                      <button className="ci-add-more-tile"
-                        onClick={(e) => { e.stopPropagation(); openPicker(); }}>
-                        <span className="ci-add-more-icon">+</span>
-                        <span>Add more</span>
-                      </button>
+                      {/* Only allow one file, so no add more button */}
                     </div>
                   )}
                   {drag && <div className="ci-drag-overlay" />}
@@ -566,10 +542,10 @@ export default function ContentIntake() {
                   <div className="ci-config-row">
                     <div className="ci-config-left">
                       <div className="ci-config-item">
-                        <span className="ci-config-label">Files selected</span>
-                        <span className="ci-config-value">{files.length}</span>
+                        <span className="ci-config-label">File selected</span>
+                        <span className="ci-config-value">{files[0]?.name}</span>
                       </div>
-                      <button className="ci-clear-btn" onClick={clearAll}>Clear all</button>
+                      <button className="ci-clear-btn" onClick={clearAll}>Clear</button>
                     </div>
                     <div className="ci-config-right">
                       <span className="ci-config-label">Flashcards</span>

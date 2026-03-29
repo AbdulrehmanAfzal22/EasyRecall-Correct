@@ -55,7 +55,7 @@ export default function PricingSection() {
           {/* Monthly Card */}
           <div className="pricing-card-monthly">
             <div className="card-header">
-              <h3 className="plan-title">Premium Monthly</h3>
+              <h3 className="plan-title">Pro</h3>
               <span className="badge-popular">Popular</span>
             </div>
 

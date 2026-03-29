@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText, Zap, HelpCircle, Trash2, Search, Upload,
-  Grid3x3, List, Clock, ChevronRight, BookOpen, X,
+  Grid3x3, List, Clock, ChevronRight, BookOpen, X, 
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -46,7 +46,6 @@ function DeleteModal({ doc, onConfirm, onCancel, deleting }) {
   );
 }
 
-// ── Note Dropdown ─────────────────────────────────────────────────────────
 function NoteDropdown({ doc, onClose }) {
   const ref = useRef(null);
 
@@ -163,17 +162,12 @@ function ConceptCard({ doc, onStudy, onQuiz, onSegments, onDelete }) {
             {doc.segmentCount > 0 && (
               <button className="dc-btn" onClick={() => onSegments(doc)}>📌 Segments</button>
             )}
+            <button 
+               className="button-note"
+            onClick={() => setExpanded((v) => !v)}>
+              <FileText size={24} />Key Concepts</button>
 
-            {/* Note button + inline dropdown */}
-            <div className="dc-note-wrap">
-              <button
-                className="dc-btn dc-btn-notes"
-                onClick={(e) => { e.stopPropagation(); setShowNote((v) => !v); }}
-              >
-                🗒️ Note
-              </button>
-              {showNote && <NoteDropdown doc={doc} onClose={() => setShowNote(false)} />}
-            </div>
+           
           </div>
         </div>
       )}
@@ -185,7 +179,12 @@ function ConceptCard({ doc, onStudy, onQuiz, onSegments, onDelete }) {
           {doc.segmentCount > 0 && (
             <button className="dc-btn dc-btn-sm" onClick={(e) => { e.stopPropagation(); onSegments(doc); }}>📌 Segments</button>
           )}
+          <button
+          className="button-note"
+          onClick={() => setExpanded((v) => !v)}> 
+          <FileText size={24} />Key Concepts</button>
         </div>
+        
       )}
     </div>
   );
@@ -247,16 +246,7 @@ function DocCard({ doc, onStudy, onQuiz, onSegments, onDelete }) {
         <button className="dc-btn dc-btn-secondary" onClick={() => onQuiz(doc)}>📝 Quiz</button>
         {doc.segmentCount > 0 && <button className="dc-btn" onClick={() => onSegments(doc)}>📌 Segments</button>}
 
-        {/* Note button + inline dropdown */}
-        <div className="dc-note-wrap">
-          <button
-            className="dc-btn dc-btn-notes"
-            onClick={() => setShowNote((v) => !v)}
-          >
-            🗒️ Note
-          </button>
-          {showNote && <NoteDropdown doc={doc} onClose={() => setShowNote(false)} />}
-        </div>
+      
       </div>
     </div>
   );

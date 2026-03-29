@@ -90,50 +90,49 @@ When you receive images or documents, focus on educational content and help stud
       { role: "system", content: systemPrompt }
     ];
 
+
+    // Check if the user's message is educational
+    function isEducational(text) {
+      if (!text) return false;
+      const educationalKeywords = [
+        'explain', 'study', 'learn', 'education', 'concept', 'subject', 'topic', 'quiz', 'flashcard',
+        'how', 'why', 'what', 'when', 'where', 'who', 'example', 'define', 'describe', 'summarize',
+        'science', 'math', 'history', 'biology', 'chemistry', 'physics', 'geography', 'language',
+        'formula', 'theory', 'principle', 'law', 'process', 'analyze', 'compare', 'contrast', 'calculate',
+        'solve', 'examination', 'test', 'practice', 'review', 'exercises', 'assignment', 'homework', 'school',
+        'college', 'university', 'class', 'lecture', 'course', 'curriculum', 'syllabus', 'explanation', 'explanations'
+      ];
+      const lower = text.toLowerCase();
+      return educationalKeywords.some((kw) => lower.includes(kw));
+    }
+
+    // If the last user message is not educational, refuse to answer
+    const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0];
+    if (lastUserMsg && !isEducational(lastUserMsg.content)) {
+      return NextResponse.json({
+        message: "Sorry, I can only answer educational questions. Please ask something related to learning, studying, or academic topics.",
+        content: "Sorry, I can only answer educational questions. Please ask something related to learning, studying, or academic topics."
+      });
+    }
+
     // Process each message and add any attached files
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
-
       if (msg.hasAttachments && msg.role === 'user' && files.length > 0) {
-        // Create a message with both text and images
         const content = [];
-
-        // Add text content
         if (msg.content) {
-          content.push({
-            type: "text",
-            text: msg.content
-          });
+          content.push({ type: "text", text: msg.content });
         }
-
-        // Add file content
         files.forEach(file => {
           if (file.type === 'image') {
-            content.push({
-              type: "image_url",
-              image_url: {
-                url: `data:${file.mimeType};base64,${file.data}`
-              }
-            });
+            content.push({ type: "image_url", image_url: { url: `data:${file.mimeType};base64,${file.data}` } });
           } else if (file.type === 'document') {
-            // Add document text as additional context
-            content.push({
-              type: "text",
-              text: `Document "${file.name}" content:\n${file.text}`
-            });
+            content.push({ type: "text", text: `Document "${file.name}" content:\n${file.text}` });
           }
         });
-
-        openaiMessages.push({
-          role: msg.role,
-          content: content
-        });
+        openaiMessages.push({ role: msg.role, content: content });
       } else {
-        // Regular text message
-        openaiMessages.push({
-          role: msg.role,
-          content: msg.content
-        });
+        openaiMessages.push({ role: msg.role, content: msg.content });
       }
     }
 

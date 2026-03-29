@@ -6,11 +6,31 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Post-process response to remove any markdown bold markers
+// Post-process response to remove all markdown formatting for pure plain text output
 function cleanResponse(text) {
   if (!text) return text;
-  // Remove ** markers but preserve the text between them
-  return text.replace(/\*\*(.*?)\*\*/g, '$1');
+  let cleaned = text;
+  // Remove markdown headings (###, ##, #) and keep only the text
+  cleaned = cleaned.replace(/^\s*#{1,6}\s*(.*)$/gm, (match, p1) => p1.trim());
+  // Remove all bold markers (**text**) and keep only the text
+  cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
+  // Remove italics (*text*)
+  cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+  // Remove inline code `text`
+  cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
+  // Remove strikethrough ~~text~~
+  cleaned = cleaned.replace(/~~([^~]+)~~/g, '$1');
+  // Remove blockquotes
+  cleaned = cleaned.replace(/^>\s?/gm, '');
+  // Remove unordered/ordered list markers
+  cleaned = cleaned.replace(/^\s*[-*+]\s+/gm, '');
+  cleaned = cleaned.replace(/^\s*\d+\.\s+/gm, '');
+  // Remove images and links
+  cleaned = cleaned.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+  cleaned = cleaned.replace(/\[[^\]]*\]\([^)]*\)/g, '');
+  // Remove extra blank lines
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+  return cleaned.trim();
 }
 
 export async function POST(req) {
@@ -160,10 +180,12 @@ REMEMBER: DO NOT USE ** FOR BOLD. DO NOT USE MARKDOWN. PLAIN TEXT ONLY.`;
 
     // Extract the response text and clean it
     let assistantMessage = response.choices[0].message.content;
-    
     // Post-process to remove any remaining ** markers
     assistantMessage = cleanResponse(assistantMessage);
-
+    // Fallback if response is empty, only whitespace, or only '**'
+    if (!assistantMessage || !assistantMessage.trim() || assistantMessage.trim() === "**") {
+      assistantMessage = "Sorry, I couldn't generate a response. Please try rephrasing your question or try again later.";
+    }
     return NextResponse.json({
       message: assistantMessage,
       content: assistantMessage,
@@ -195,3 +217,5 @@ REMEMBER: DO NOT USE ** FOR BOLD. DO NOT USE MARKDOWN. PLAIN TEXT ONLY.`;
     );
   }
 }
+
+  
