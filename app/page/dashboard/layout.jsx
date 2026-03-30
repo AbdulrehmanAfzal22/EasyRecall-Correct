@@ -156,7 +156,7 @@ export default function DashboardLayout({ children }) {
   };
 
   const handleUpgradeClick = () => {
-    router.push("/page/pricing");
+    router.push("/page/dashboard/pricing");
   };
 
   return (
