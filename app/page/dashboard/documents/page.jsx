@@ -5,10 +5,10 @@ import {
   FileText, Zap, HelpCircle, Trash2, Search, Upload,
   Grid3x3, List, Clock, ChevronRight, BookOpen, X, 
 } from "lucide-react";
-import { auth } from "@/lib/firebase";
+import { auth } from "../../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { loadDocuments, deleteDocument, formatDate } from "../../../../lib/service";
-import { saveFlashcards } from "@/lib/flashcardStore";
+import { saveFlashcards } from "../../../../lib/flashcardStore";
 import { saveQuiz } from "../../../../lib/quizStore";
 import { saveSegments } from "../../../../lib/segmentStore";
 import "./document.css";

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { FileText, Upload, FileCode, FileJson, BarChart3, Table } from "lucide-react";
 import { auth } from "../../../../lib/firebase";
 import { saveDocument, loadDocuments } from "../../../../lib/service";
-import { saveFlashcards } from "@/lib/flashcardStore";
+import { saveFlashcards } from "../../../../lib/flashcardStore";
 import { saveQuiz } from "../../../../lib/quizStore";
 import { saveSegments } from "../../../../lib/segmentStore";
 import { checkAndIncrement, getRemaining } from "../../../../lib/usageService";

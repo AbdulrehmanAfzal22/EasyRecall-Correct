@@ -9,8 +9,8 @@ import {
   computeCombinedAccuracy,
   clearProgress,
   saveSession,
-} from "@/lib/flashcardStore";
-import { loadQuizProgress } from "@/lib/quizStore";
+} from "../../../../lib/flashcardStore";
+import { loadQuizProgress } from "../../../../lib/quizStore";
 import "./progress.css";
 
 // ══════════════════════════════════════════════════════════════════════════════

@@ -4,8 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Send, Sparkles, Bot, User, Loader2, RotateCcw, Plus, X, FileText, ImageIcon, Menu, History, MessageSquare, Trash2, ChevronDown } from "lucide-react";
 import { useAuth } from "../../AuthProvider";
-import { saveChatToFirestore, getUserChats, getChatById, deleteChatFromFirestore, subscribeToUserChats } from "@/lib/firebaseStore";
-import { checkAndIncrement, getRemaining } from "@/lib/usageService";
+import { saveChatToFirestore, getUserChats, getChatById, deleteChatFromFirestore, subscribeToUserChats } from "../../../../lib/firebaseStore";
+import { checkAndIncrement, getRemaining } from "../../../../lib/usageService";
 import "./ai-chat.css";
 
 // Helper: Bold topic headings like "1. Matter:" or "2. Energy:"
