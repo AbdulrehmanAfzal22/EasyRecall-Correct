@@ -9,7 +9,7 @@ import {
   saveSAAnswer,
   computeQuizStats,
   clearQuizProgress,
-} from "@/lib/quizStore";
+} from "../../../../lib/quizStore";
 import "./quiz.css";
 // ══════════════════════════════════════════════════════════════════════════════
 //  ALERT POPUP SYSTEM — fully self-contained, no external dependencies
@@ -196,18 +196,20 @@ export default function QuizPage() {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const stored = loadQuiz();
-    const prog   = loadQuizProgress();
-    if (stored?.quiz) {
-      setQuiz(stored.quiz);
-      setProgress(prog);
-      setStats(computeQuizStats(stored.quiz, prog));
-      const hasProgress =
-        Object.keys(prog.mcq).length > 0 ||
-        Object.keys(prog.tf).length  > 0 ||
-        Object.keys(prog.sa).length  > 0;
-      if (hasProgress) setStarted(true);
-    }
+    (async () => {
+      const stored = await loadQuiz();
+      const prog   = loadQuizProgress();
+      if (stored?.quiz) {
+        setQuiz(stored.quiz);
+        setProgress(prog);
+        setStats(computeQuizStats(stored.quiz, prog));
+        const hasProgress =
+          Object.keys(prog.mcq).length > 0 ||
+          Object.keys(prog.tf).length  > 0 ||
+          Object.keys(prog.sa).length  > 0;
+        if (hasProgress) setStarted(true);
+      }
+    })();
   }, []);
 
   // ── Derived totals ────────────────────────────────────────────────────────

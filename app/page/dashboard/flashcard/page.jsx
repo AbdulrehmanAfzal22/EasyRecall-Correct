@@ -9,7 +9,7 @@ import {
   saveSession,
   loadSession,
   computeStats,
-} from "@/lib/flashcardStore";
+} from "../../../../lib/flashcardStore";
 import "./flashcard.css";
 
 const RATINGS = [
@@ -53,13 +53,15 @@ export default function FlashcardPage() {
   // ─── load on mount ────────────────────────────────────────────────────────
 
   useEffect(() => {
-    const stored = loadFlashcards();
-    if (stored?.cards?.length) {
-      setCards(stored.cards);
-      const savedIdx = loadSession();
-      setIndex(Math.min(savedIdx, stored.cards.length - 1));
-    }
-    setProgress(loadProgress());
+    (async () => {
+      const stored = await loadFlashcards();
+      if (stored?.cards?.length) {
+        setCards(stored.cards);
+        const savedIdx = loadSession();
+        setIndex(Math.min(savedIdx, stored.cards.length - 1));
+      }
+      setProgress(loadProgress());
+    })();
   }, []);
 
   // ─── navigation ───────────────────────────────────────────────────────────

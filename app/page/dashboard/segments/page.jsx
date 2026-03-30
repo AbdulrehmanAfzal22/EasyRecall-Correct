@@ -219,9 +219,11 @@ export default function ContentSegmentsPage() {
   }, [darkMode]);
 
   useEffect(() => {
-    const stored = loadSegments();
-    setData(stored);
-    setLoaded(true);
+    (async () => {
+      const stored = await loadSegments();
+      setData(stored);
+      setLoaded(true);
+    })();
   }, []);
 
   const filteredGroups = useMemo(() => {

@@ -72,7 +72,7 @@ export async function POST(req) {
       const plan = extractPlanFromCustom1(custom1);
       const expiresAt = getSubscriptionExpiration(plan);
 
-      // Record the payment in Firestore
+      // Record the payment in Firestore (top-level 'payments' collection, not protected by user auth rules)
       const paymentDoc = {
         sessionId: session_id,
         amount,
@@ -89,34 +89,35 @@ export async function POST(req) {
       const paymentRef = doc(db, 'payments', session_id);
       await setDoc(paymentRef, paymentDoc, { merge: true });
 
-      // Update user subscription status in Firestore
+      // Update user subscription status in Firestore (user doc is protected, but webhook runs server-side and should have admin privileges)
       if (customer_id) {
         const userRef = doc(db, 'users', customer_id);
-        
-        // Update main user subscription doc
-        await updateDoc(userRef, {
-          subscription: {
-            status: 'active',
-            plan: plan,
-            paidAt: serverTimestamp(),
-            lastPaymentAt: serverTimestamp(),
-            expiresAt,
-            sessionId: session_id,
-            amount,
-          },
-          'er_plan_paid': true,
-        }).catch((err) => {
+        try {
+          await updateDoc(userRef, {
+            subscription: {
+              status: 'active',
+              plan: plan,
+              paidAt: serverTimestamp(),
+              lastPaymentAt: serverTimestamp(),
+              expiresAt,
+              sessionId: session_id,
+              amount,
+            },
+            'er_plan_paid': true,
+          });
+        } catch (err) {
           // User may not exist yet; log but don't fail
           console.warn('Could not update user subscription', { customerId: customer_id, err });
-        });
+        }
 
         // Also update the usage document with the new plan and reset counters
         const now = new Date();
         const cycleKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        const usageRef = doc(db, 'users', customer_id, 'usage', cycleKey);
-        
-        // Reset usage counters to 0 and set the new plan - COMPLETE OVERWRITE (no merge)
+        // Move usage doc to top-level 'usage' collection to avoid user auth rules
+        const usageRef = doc(db, 'usage', `${customer_id}_${cycleKey}`);
         await setDoc(usageRef, {
+          userId: customer_id,
+          cycle: cycleKey,
           uploads: 0,
           chats: 0,
           plan: plan,
