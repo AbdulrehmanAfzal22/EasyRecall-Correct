@@ -2,10 +2,38 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// Post-process response to remove all markdown formatting for pure plain text output
+function cleanResponse(text) {
+  if (!text) return text;
+  let cleaned = text;
+  // Remove markdown headings (###, ##, #) and keep only the text
+  cleaned = cleaned.replace(/^\s*#{1,6}\s*(.*)$/gm, (match, p1) => p1.trim());
+  // Remove all bold markers (**text**) and keep only the text
+  cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
+  // Remove italics (*text*)
+  cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+  // Remove inline code `text`
+  cleaned = cleaned.replace(/`([^`]+)`/g, '$1');
+  // Remove strikethrough ~~text~~
+  cleaned = cleaned.replace(/~~([^~]+)~~/g, '$1');
+  // Remove blockquotes
+  cleaned = cleaned.replace(/^>\s?/gm, '');
+  // Remove unordered/ordered list markers
+  cleaned = cleaned.replace(/^\s*[-*+]\s+/gm, '');
+  cleaned = cleaned.replace(/^\s*\d+\.\s+/gm, '');
+  // Remove images and links
+  cleaned = cleaned.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
+  cleaned = cleaned.replace(/\[[^\]]*\]\([^)]*\)/g, '');
+  // Remove extra blank lines
+  cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+  return cleaned.trim();
+}
 
 export async function POST(req) {
-  // Instantiate lazily so build doesn't fail if OPENAI_API_KEY is absent
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   try {
     // Handle both JSON and FormData
     let messages = [];
@@ -59,9 +87,13 @@ export async function POST(req) {
       );
     }
 
-    // System prompt for study assistant
-    const systemPrompt = `You are a helpful AI study assistant designed to help students learn effectively. Your role is to:
+    // System prompt - CRITICAL: NO BOLD MARKERS ALLOWED
+    const systemPrompt = `You are a helpful AI study assistant designed to help students learn effectively.
 
+CRITICAL INSTRUCTION - YOU MUST FOLLOW THIS:
+NEVER use ** (double asterisks) for bold text in your responses. NEVER use markdown formatting. Use plain text only.
+
+Your role is to:
 1. Explain complex concepts in simple, easy-to-understand terms
 2. Answer questions about any academic subject
 3. Create study plans and learning strategies
@@ -82,79 +114,85 @@ Guidelines:
 - When analyzing images or screenshots, describe what you see and relate it to the learning context
 - For text documents, summarize key points and help students understand the content
 - Always aim to make learning engaging and accessible for students of all levels
+- Be very informative and give answers only if you are 100% sure they are correct
+- If you are not sure about the answer, say "I'm not sure about that, but I can help you find more information."
 
-When you receive images or documents, focus on educational content and help students learn from the visual or textual information provided.`;
+REMEMBER: DO NOT USE ** FOR BOLD. DO NOT USE MARKDOWN. PLAIN TEXT ONLY.`;
 
-    // Prepare messages for OpenAI
     const openaiMessages = [
       { role: "system", content: systemPrompt }
     ];
 
-
-    // Check if the user's message is educational
-    function isEducational(text) {
-      if (!text) return false;
-      const educationalKeywords = [
-        'explain', 'study', 'learn', 'education', 'concept', 'subject', 'topic', 'quiz', 'flashcard',
-        'how', 'why', 'what', 'when', 'where', 'who', 'example', 'define', 'describe', 'summarize',
-        'science', 'math', 'history', 'biology', 'chemistry', 'physics', 'geography', 'language',
-        'formula', 'theory', 'principle', 'law', 'process', 'analyze', 'compare', 'contrast', 'calculate',
-        'solve', 'examination', 'test', 'practice', 'review', 'exercises', 'assignment', 'homework', 'school',
-        'college', 'university', 'class', 'lecture', 'course', 'curriculum', 'syllabus', 'explanation', 'explanations'
-      ];
-      const lower = text.toLowerCase();
-      return educationalKeywords.some((kw) => lower.includes(kw));
-    }
-
-    // If the last user message is not educational, refuse to answer
-    const lastUserMsg = messages.filter(m => m.role === 'user').slice(-1)[0];
-    if (lastUserMsg && !isEducational(lastUserMsg.content)) {
-      return NextResponse.json({
-        message: "Sorry, I can only answer educational questions. Please ask something related to learning, studying, or academic topics.",
-        content: "Sorry, I can only answer educational questions. Please ask something related to learning, studying, or academic topics."
-      });
-    }
-
     // Process each message and add any attached files
     for (let i = 0; i < messages.length; i++) {
       const msg = messages[i];
+
       if (msg.hasAttachments && msg.role === 'user' && files.length > 0) {
+        // Create a message with both text and images
         const content = [];
+
+        // Add text content
         if (msg.content) {
-          content.push({ type: "text", text: msg.content });
+          content.push({
+            type: "text",
+            text: msg.content
+          });
         }
+
+        // Add file content
         files.forEach(file => {
           if (file.type === 'image') {
-            content.push({ type: "image_url", image_url: { url: `data:${file.mimeType};base64,${file.data}` } });
+            content.push({
+              type: "image_url",
+              image_url: {
+                url: `data:${file.mimeType};base64,${file.data}`
+              }
+            });
           } else if (file.type === 'document') {
-            content.push({ type: "text", text: `Document "${file.name}" content:\n${file.text}` });
+            // Add document text as additional context
+            content.push({
+              type: "text",
+              text: `Document "${file.name}" content:\n${file.text}`
+            });
           }
         });
-        openaiMessages.push({ role: msg.role, content: content });
+
+        openaiMessages.push({
+          role: msg.role,
+          content: content
+        });
       } else {
-        openaiMessages.push({ role: msg.role, content: msg.content });
+        // Regular text message
+        openaiMessages.push({
+          role: msg.role,
+          content: msg.content
+        });
       }
     }
 
     // Call OpenAI API
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Supports vision
+      model: "gpt-4o-mini",
       max_tokens: 2000,
       messages: openaiMessages,
     });
 
-    // Extract the response text
-    const assistantMessage = response.choices[0].message.content;
-
+    // Extract the response text and clean it
+    let assistantMessage = response.choices[0].message.content;
+    // Post-process to remove any remaining ** markers
+    assistantMessage = cleanResponse(assistantMessage);
+    // Fallback if response is empty, only whitespace, or only '**'
+    if (!assistantMessage || !assistantMessage.trim() || assistantMessage.trim() === "**") {
+      assistantMessage = "Sorry, I couldn't generate a response. Please try rephrasing your question or try again later.";
+    }
     return NextResponse.json({
       message: assistantMessage,
-      content: assistantMessage, // Support both formats
+      content: assistantMessage,
     });
 
   } catch (error) {
     console.error("Chat API error:", error);
 
-    // Handle specific OpenAI API errors
     if (error.status === 429) {
       return NextResponse.json(
         { error: "Rate limit exceeded. Please try again in a moment." },
@@ -178,3 +216,5 @@ When you receive images or documents, focus on educational content and help stud
     );
   }
 }
+
+  
