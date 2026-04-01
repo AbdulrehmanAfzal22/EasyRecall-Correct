@@ -10,7 +10,6 @@ import { saveSegments } from "../../../../lib/segmentStore";
 import { checkAndIncrement, getRemaining } from "../../../../lib/usageService";
 import "./content-intake.css";
 
-// ── File type icons and utilities ──────────────────────────────────────────
 const FILE_ICONS = {
   pdf: FileText, txt: FileCode, md: FileCode, doc: FileText, docx: FileText,
   ppt: BarChart3, pptx: BarChart3, xls: Table, xlsx: Table,
@@ -36,7 +35,6 @@ const formatSize = (bytes) => {
   return (bytes / (1024 ** 2)).toFixed(1) + " MB";
 };
 
-// ── Usage Progress Bar Component ────────────────────────────────────────────
 function UsageBar({ usageInfo, onReset }) {
   if (!usageInfo) return null;
 
@@ -157,25 +155,8 @@ export default function ContentIntake() {
   const inputRef = useRef();
 
   const [inputMode,    setInputMode]    = useState("file");
-  const [documents, setDocuments] = useState([]);
-  const [loadingDocs, setLoadingDocs] = useState(false);
-    // Fetch uploaded documents on mount and when user changes
-    useEffect(() => {
-      const fetchDocs = async () => {
-        const uid = auth.currentUser?.uid;
-        if (!uid) return;
-        setLoadingDocs(true);
-        try {
-          const docs = await loadDocuments(uid);
-          setDocuments(docs);
-        } catch (e) {
-          console.error("Failed to load documents:", e);
-        } finally {
-          setLoadingDocs(false);
-        }
-      };
-      fetchDocs();
-    }, []);
+  const [documents,    setDocuments]    = useState([]);
+  const [loadingDocs,  setLoadingDocs]  = useState(false);
   const [pastedText,   setPastedText]   = useState("");
   const [files,        setFiles]        = useState([]);
   const [rawFiles,     setRawFiles]     = useState([]);
@@ -193,7 +174,7 @@ export default function ContentIntake() {
   // ── Usage state ──────────────────────────────────────────────────────────
   const [usageInfo, setUsageInfo] = useState(null);
 
-  // Function to refresh usage
+  // ── Refresh usage ────────────────────────────────────────────────────────
   const refreshUsage = useCallback(() => {
     const uid   = auth.currentUser?.uid;
     const email = auth.currentUser?.email;
@@ -205,14 +186,73 @@ export default function ContentIntake() {
     refreshUsage();
   }, [refreshUsage]);
 
-  // Detect payment return and refresh usage
+  // ── Fetch uploaded documents on mount and restore last doc state ─────────
+  useEffect(() => {
+    const fetchDocs = async () => {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
+      setLoadingDocs(true);
+      try {
+        const docs = await loadDocuments(uid);
+        setDocuments(docs);
+
+        // ── RESTORE last document's output ──────────────────────────────────
+        // docs[0] is assumed to be the newest document.
+        // Adjust to docs[docs.length - 1] if your loadDocuments returns oldest-first.
+        const latest = docs[0];
+        if (latest) {
+          // Re-sync localStorage so flashcard/quiz/segment pages work immediately
+          if (latest.flashcards?.length) {
+            saveFlashcards(latest.flashcards, {
+              fileNames: latest.topic,
+              numCards: latest.flashcards.length,
+              topic: latest.topic,
+            });
+          }
+
+          if (latest.quiz) {
+            saveQuiz(latest.quiz, {
+              fileNames: latest.topic,
+              topic: latest.topic,
+            });
+          }
+
+          if (latest.segments) {
+            const segData = {
+              groups: latest.segments,
+              stats: latest.segmentStats ?? null,
+            };
+            saveSegments(segData, {
+              fileNames: latest.topic,
+              topic: latest.topic,
+            });
+            setSegmentCount(
+              latest.segmentStats?.totalSegments ??
+              latest.segments.flatMap((g) => g.segments).length
+            );
+          }
+
+          // Show the success screen with restored counts
+          setCardCount(latest.flashcards?.length ?? 0);
+          setDone(true);
+        }
+        // ────────────────────────────────────────────────────────────────────
+      } catch (e) {
+        console.error("Failed to load documents:", e);
+      } finally {
+        setLoadingDocs(false);
+      }
+    };
+    fetchDocs();
+  }, []);
+
+  // ── Detect payment return and refresh usage ──────────────────────────────
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const status = params.get('skipcash_status');
       if (status === 'success') {
         console.log('📁 Content intake: Payment success detected, refreshing usage in 3s');
-        // Wait for webhook to process, then refresh
         const timer = setTimeout(() => {
           console.log('🔄 Content intake: Refreshing usage now');
           refreshUsage();
@@ -224,7 +264,7 @@ export default function ContentIntake() {
     }
   }, [refreshUsage]);
 
-  // Also refresh when page becomes visible (tab focus)
+  // ── Refresh usage when tab regains focus ─────────────────────────────────
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -232,12 +272,11 @@ export default function ContentIntake() {
         refreshUsage();
       }
     };
-    
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, [refreshUsage]);
 
-  // ── Drag / drop ────────────────────────────────────────────────────────
+  // ── Drag handlers ────────────────────────────────────────────────────────
   const handleDragEnter = useCallback((e) => {
     e.preventDefault();
     setDragCount((c) => { if (c === 0) setDrag(true); return c + 1; });
@@ -254,7 +293,7 @@ export default function ContentIntake() {
 
   // Only allow one file at a time
   const addFiles = (incoming) => {
-    const arr  = Array.from(incoming);
+    const arr = Array.from(incoming);
     if (arr.length === 0) return;
     const f = arr[0];
     const meta = [{
@@ -280,11 +319,10 @@ export default function ContentIntake() {
 
   const openPicker = () => inputRef.current?.click();
 
-  // ── Generate: flashcards + segments in parallel ─────────────────────
+  // ── Main generate handler ─────────────────────────────────────────────────
   const handleGenerate = async () => {
     setError(""); setGenerating(true); setGenProgress(0); setSaving(false);
 
-    // ── Check upload limit BEFORE processing ──────────────────────────
     const uid   = auth.currentUser?.uid;
     const email = auth.currentUser?.email;
 
@@ -296,13 +334,10 @@ export default function ContentIntake() {
           `Upgrade your plan to continue.`
         );
         setGenerating(false);
-        // Refresh usage display
         getRemaining(uid, email).then(setUsageInfo).catch(console.error);
-        // Redirect to pricing page
         setTimeout(() => router.push("/page/pricing"), 1500);
         return;
       }
-      // Refresh displayed usage after incrementing
       getRemaining(uid, email).then(setUsageInfo).catch(console.error);
     }
 
@@ -313,7 +348,7 @@ export default function ContentIntake() {
     }, 280);
 
     try {
-      // ── Read content ──
+      // ── Read content ──────────────────────────────────────────────────────
       let combined = "", fileNames = "";
       if (inputMode === "text") {
         combined  = pastedText.trim();
@@ -327,7 +362,7 @@ export default function ContentIntake() {
         if (!combined.trim()) throw new Error("Files appear to be empty or unreadable.");
       }
 
-      // ── Fire both APIs in parallel ──
+      // ── Fire both APIs in parallel ────────────────────────────────────────
       const [flashRes, segRes] = await Promise.allSettled([
         fetch("/api/generate-flashcards", {
           method: "POST",
@@ -343,7 +378,7 @@ export default function ContentIntake() {
         }),
       ]);
 
-      // ── Handle flashcards ──
+      // ── Handle flashcards ─────────────────────────────────────────────────
       if (flashRes.status === "rejected") {
         throw new Error(`Flashcard generation failed: ${flashRes.reason?.message}`);
       }
@@ -355,7 +390,7 @@ export default function ContentIntake() {
         throw new Error(flashData.error || "Flashcard generation failed.");
       }
 
-      // ── Handle segments (non-blocking — failure is OK) ──
+      // ── Handle segments ───────────────────────────────────────────────────
       let segmentData = null;
       if (segRes.status === "fulfilled") {
         try {
@@ -366,17 +401,15 @@ export default function ContentIntake() {
         } catch (_) { /* silently skip */ }
       }
 
-      // ── Save flashcards & quiz ──
       saveFlashcards(flashData.flashcards, { fileNames, numCards, topic: fileNames });
       if (flashData.quiz) saveQuiz(flashData.quiz, { fileNames, topic: fileNames });
 
-      // ── Save segments ──
       if (segmentData?.groups) {
         saveSegments(segmentData, { fileNames, topic: fileNames });
         setSegmentCount(segmentData.stats?.totalSegments ?? segmentData.groups.flatMap(g => g.segments).length);
       }
 
-      // ── Firebase save ──
+      // ── Firebase save ─────────────────────────────────────────────────────
       if (uid) {
         setSaving(true);
         try {
@@ -413,16 +446,15 @@ export default function ContentIntake() {
     }
   };
 
-  // Only allow generate if exactly one file or pasted text
+  // ── Derived state ────────────────────────────────────────────────────────
   const canGenerate = inputMode === "text"
     ? pastedText.trim().length > 0
     : files.length === 1;
 
   const uploadLimitReached = usageInfo && usageInfo.uploads === 0 && usageInfo.uploads !== Infinity;
-
   const wordCount = pastedText.trim() ? pastedText.trim().split(/\s+/).length : 0;
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  // ── Render ───────────────────────────────────────────────────────────────
   return (
     <>
       <div className="topbar">
@@ -444,12 +476,10 @@ export default function ContentIntake() {
           </p>
         </div>
 
-        {/* ── Usage Bar ────────────────────────────────────────────────── */}
-        <UsageBar usageInfo={usageInfo} />
+        <UsageBar usageInfo={usageInfo} onReset={refreshUsage} />
 
         {!done ? (
           <>
-            {/* Removed 'Your Uploaded Document' and meta info. Uploaded file will remain visible in uploader below until user clicks 'Upload new content'. */}
             <div className="ci-mode-tabs">
               <button
                 className={`ci-mode-tab ${inputMode === "file" ? "ci-mode-tab--active" : ""}`}
@@ -532,7 +562,6 @@ export default function ContentIntake() {
                           <div className="ci-file-size">{f.size}</div>
                         </div>
                       ))}
-                      {/* Only allow one file, so no add more button */}
                     </div>
                   )}
                   {drag && <div className="ci-drag-overlay" />}
@@ -641,7 +670,7 @@ export default function ContentIntake() {
             )}
           </>
         ) : (
-          /* ── Success state ──────────────────────────────────────────── */
+          /* ── Success state ── */
           <div className="ci-success-state">
             <div className="ci-success-burst">
               <div className="ci-success-ring ci-success-ring--1" />
