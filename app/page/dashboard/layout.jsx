@@ -5,7 +5,7 @@ import "./layout-sidebar.css";
 import "./dash-home/dashboard.css";
 import { useAuth } from "../AuthProvider.jsx";
 import { useSubscription } from "../../hooks/useSubscription";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 const OWNER_EMAILS = [
   "musa@gmail.com",
@@ -14,7 +14,9 @@ const OWNER_EMAILS = [
 export default function DashboardLayout({ children }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const isPricingRoute = pathname === "/page/dashboard/pricing";
 
   const [isDark, setIsDark] = useState(false);
   const [hasActivePlan, setHasActivePlan] = useState(false);
@@ -127,7 +129,7 @@ export default function DashboardLayout({ children }) {
      5️⃣ Lock Scroll if Modal Open
   ───────────────────────────────────────────── */
   useEffect(() => {
-    if (showUpgradeModal && !hasActivePlan) {
+    if (showUpgradeModal && !hasActivePlan && !isPricingRoute) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -135,7 +137,7 @@ export default function DashboardLayout({ children }) {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [showUpgradeModal, hasActivePlan]);
+  }, [showUpgradeModal, hasActivePlan, isPricingRoute]);
 
   /* ─────────────────────────────────────────────
      Theme Toggle
@@ -156,18 +158,22 @@ export default function DashboardLayout({ children }) {
   };
 
   const handleUpgradeClick = () => {
-    router.push("/page/dashboard/pricing");
+    router.push("/page/dashboard/pricing?from=upgrade");
   };
 
   return (
-    <div className={`dashboard-wrapper ${isDark ? "dark" : "light"}`}>
-      <Sidebar isDark={isDark} onToggleTheme={toggleTheme} />
+    <div
+      className={`dashboard-wrapper ${isDark ? "dark" : "light"}${isPricingRoute ? " dashboard-wrapper--pricing" : ""}`}
+    >
+      {!isPricingRoute && (
+        <Sidebar isDark={isDark} onToggleTheme={toggleTheme} />
+      )}
 
       <main className="dashboard-content">
         {children}
       </main>
 
-      {showUpgradeModal && !hasActivePlan && (
+      {showUpgradeModal && !hasActivePlan && !isPricingRoute && (
         <div className="upgrade-overlay">
           <div className="upgrade-modal">
             <h2 className="upgrade-title">

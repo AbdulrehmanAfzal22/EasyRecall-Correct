@@ -6,6 +6,13 @@
   background: var(--bg-page);
 }
 
+/* Pricing is a full-bleed route (no dashboard sidebar). */
+.dashboard-wrapper--pricing .dashboard-content {
+  margin-left: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
 .dashboard-content {
   flex: 1;
   margin-left: 240px;
