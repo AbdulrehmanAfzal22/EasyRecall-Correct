@@ -74,7 +74,7 @@ export default function SubscriptionPricing() {
 
             <div className="price-block">
               <span className="currency">$</span>
-              <span className="amount">1.00</span>
+              <span className="amount">36.45</span>
               <span className="billing-period">/mo</span>
             </div>
 
@@ -97,7 +97,7 @@ export default function SubscriptionPricing() {
 
             <button
               className="start-button"
-              onClick={() => handlePurchase(1.00, "monthly")}
+              onClick={() => handlePurchase(36.45, "monthly")}
               disabled={loading}
             >
               {loading ? "Loading..." : "Get Started Monthly"}
@@ -107,14 +107,14 @@ export default function SubscriptionPricing() {
           {/* Yearly Card */}
           <div className="pricing-card-yearly">
             <div className="card-header">
-              <h3 className="plan-title">Premium Monthly
+              <h3 className="plan-title">Premium Yearly
               </h3>
               <span className="badge-recommended">Save 20%</span>
             </div>
 
             <div className="price-block">
               <span className="currency">$</span>
-              <span className="amount">2.00</span>
+              <span className="amount">91.12</span>
               <span className="billing-period">/yr</span>
             </div>
 
@@ -137,7 +137,7 @@ export default function SubscriptionPricing() {
 
             <button
               className="start-button"
-              onClick={() => handlePurchase(2.00, "yearly")}
+              onClick={() => handlePurchase(91.12, "yearly")}
               disabled={loading}
             >
               {loading ? "Loading..." : "Get Started Yearly"}

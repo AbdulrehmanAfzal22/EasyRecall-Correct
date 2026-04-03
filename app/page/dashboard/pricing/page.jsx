@@ -66,7 +66,7 @@ export default function PricingSection() {
 
             <div className="price-block">
               <span className="currency">$</span>
-              <span className="amount">1</span>
+              <span className="amount">10</span>
               <span className="amount-cents">.00</span>
               <div className="price-meta">
                 <span className="billing-period">/mo</span>
@@ -96,7 +96,7 @@ export default function PricingSection() {
 
             <button
               className="start-button btn-blue"
-              onClick={() => handlePurchase(1.0)}
+              onClick={() => handlePurchase(36.45)}
             >
               Get Started Monthly <span className="btn-arrow">→</span>
             </button>
@@ -117,8 +117,8 @@ export default function PricingSection() {
 
             <div className="price-block">
               <span className="currency">$</span>
-              <span className="amount">9</span>
-              <span className="amount-cents">.99</span>
+              <span className="amount">25</span>
+              <span className="amount-cents">.00</span>
               <div className="price-meta">
                 <span className="billing-period">/yr</span>
                 <span className="price-sub">Billed yearly</span>
@@ -147,7 +147,7 @@ export default function PricingSection() {
 
             <button
               className="start-button btn-violet"
-              onClick={() => handlePurchase(9.99)}
+              onClick={() => handlePurchase(91.12)}
             >
               Get Started Yearly <span className="btn-arrow">→</span>
             </button>
