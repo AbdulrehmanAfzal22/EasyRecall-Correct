@@ -57,7 +57,7 @@ export async function POST(req) {
     const userName = body?.userName || "Customer";
 
     // Only allow hardcoded amounts for safety
-    const allowed = [1.00, 2.00];
+    const allowed = [1.00, 2.00, 10.00, 36.45, 91.12];
     if (!allowed.includes(amount)) {
       console.warn('Invalid amount requested', { amount, allowed });
       return NextResponse.json({ error: 'invalid_amount', amount }, { status: 400 });
@@ -126,7 +126,7 @@ export async function POST(req) {
       Country: body.country || 'QA',
       PostalCode: body.postalCode || '00000',
       TransactionId: body.transactionId || `order-${Date.now()}`,
-      Custom1: `EasyRecall Premium Subscription - ${plan === 'yearly' ? 'Yearly ($2.00)' : 'Monthly ($1.00)'} - Plan: ${plan}`,
+      Custom1: `EasyRecall Premium Subscription - ${plan === 'yearly' ? `Yearly ($${amount.toFixed(2)})` : `Monthly ($${amount.toFixed(2)})`} - Plan: ${plan}`,
       ReturnUrl: returnUrl,
     };
 

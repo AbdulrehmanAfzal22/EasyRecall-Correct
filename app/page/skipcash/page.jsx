@@ -164,7 +164,7 @@ export default function SkipCashPayment() {
 
   useEffect(() => {
     const amt = Number(searchParams.get("amount"));
-    if (!isNaN(amt) && (amt === 10.00 || amt === 2.00)) setAmount(amt);
+    if (!isNaN(amt) && [1.00, 2.00, 10.00, 36.45, 91.12].includes(amt)) setAmount(amt);
     
     const planParam = searchParams.get("plan");
     if (planParam === "monthly" || planParam === "yearly") setPlan(planParam);
