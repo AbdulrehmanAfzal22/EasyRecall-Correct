@@ -12,7 +12,7 @@ import { saveFlashcards } from "../../../../lib/flashcardStore";
 import { saveQuiz } from "../../../../lib/quizStore";
 import { saveSegments } from "../../../../lib/segmentStore";
 import "./document.css";
-
+                                                                                        
 const ICONS = {
   file: FileText, flash: Zap, quiz: HelpCircle, trash: Trash2,
   search: Search, upload: Upload, grid: Grid3x3, list: List,

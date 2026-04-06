@@ -13,9 +13,6 @@ import {
 import { loadQuizProgress } from "../../../../lib/quizStore";
 import "./progress.css";
 
-// ══════════════════════════════════════════════════════════════════════════════
-//  ALERT POPUP SYSTEM — fully self-contained, no external dependencies
-// ══════════════════════════════════════════════════════════════════════════════
 
 const AP_ICONS = {
   confirm: `<polyline points="20 6 9 17 4 12"/>`,

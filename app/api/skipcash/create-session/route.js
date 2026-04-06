@@ -57,7 +57,7 @@ export async function POST(req) {
     const userName = body?.userName || "Customer";
 
     // Only allow hardcoded amounts for safety
-    const allowed = [1.00, 2.00];
+    const allowed = [1.00, 2.00, 9.99];
     if (!allowed.includes(amount)) {
       console.warn('Invalid amount requested', { amount, allowed });
       return NextResponse.json({ error: 'invalid_amount', amount }, { status: 400 });

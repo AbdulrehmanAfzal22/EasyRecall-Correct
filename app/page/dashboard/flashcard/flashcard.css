@@ -36,7 +36,7 @@
   --fc-scene-slide-color: #0f172a;
 }
 
-/* ─── DARK THEME ────────────────────────────────────────────────────────── */
+/* ─── DARK THEME ───────────────────── */
 
 .dark {
   --fc-bg-page:           #060b18;
@@ -67,17 +67,17 @@
   --fc-nav-btn-hover-color:#ffffff;
 }
 
-/* ── Page shell ─────────────────────────────────────────────────────────── */
+/* ── Page shell ──────────────────────────── */
 
 .fc-page {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   padding-bottom: 60px;
 }
 
-/* ── Empty state ────────────────────────────────────────────────────────── */
+/* ── Empty state ────────────────────────── */
 
 .fc-empty-page {
   display: flex;
@@ -212,8 +212,6 @@
   transform: rotateY(180deg);
 }
 
-/* ── Card faces ─────────────────────────────────────────────────────────── */
-
 .fc-front,
 .fc-back {
   backface-visibility: hidden;
@@ -289,7 +287,7 @@
   line-height: 1.45;
 }
 
-/* ── Flip button ────────────────────────────────────────────────────────── */
+/* ── Flip button ───────────────────────────── */
 
 .fc-button {
   display: inline-flex;
@@ -318,7 +316,7 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
 
-/* ── Rating block ───────────────────────────────────────────────────────── */
+/* ── Rating block ─────────────────────── */
 
 .fc-ratings-block {
   width: 100%;
@@ -326,13 +324,18 @@
   opacity: 0;
   transform: translateY(10px);
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+
+  /* Collapse height when hidden so nav buttons stay tight to the card */
+  max-height: 0;
+  overflow: hidden;
 }
 
 .fc-ratings-block--visible {
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
+  max-height: 200px;
 }
 
 .fc-ratings-heading {
@@ -372,7 +375,6 @@
   filter: brightness(1.15);
 }
 
-/* Light mode: rate buttons need a subtle background since page bg is light */
 :root .fc-rate-btn {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
@@ -413,14 +415,22 @@
   font-weight: 600;
 }
 
-/* ── Nav row ────────────────────────────────────────────────────────────── */
+/* ── Nav row ────────────────────────── */
 
 .fc-nav-row {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 10px;
+  margin-top: -4px; /* nudge closer to card */
 }
 
+/* ── Nav buttons ──────────────────── */
+
 .fc-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: var(--fc-nav-btn-bg);
   border: 1px solid var(--fc-nav-btn-border);
   color: var(--fc-nav-btn-color);
@@ -431,6 +441,8 @@
   border-radius: 50px;
   cursor: pointer;
   transition: all 0.18s ease;
+  min-width: 110px;
+  justify-content: center;
 }
 
 .fc-nav-btn:hover:not(:disabled) {
@@ -455,14 +467,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-}
-
-/* ── Light mode overrides for topbar text ──────────────────────────────── */
-
-:root .fc-page .fc-header-bar,
-:root .fc-page .fc-nav-row,
-:root .fc-page .fc-ratings-block {
-  /* already handled by CSS vars, nothing extra needed */
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */

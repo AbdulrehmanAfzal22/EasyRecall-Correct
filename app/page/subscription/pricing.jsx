@@ -30,17 +30,42 @@ export default function SubscriptionPricing() {
     setThemeDark(newIsDark);
   };
 
-  const handlePurchase = (amount, planId) => {
-    // Still loading auth state — wait
-    if (loading) return;
+  const [isProcessing, setIsProcessing] = useState(false);
 
-    const paymentUrl = `/page/skipcash?amount=${amount}&plan=${planId}`;
+  const handlePurchase = async (amount, planId) => {
+    // Still loading auth state — wait
+    if (loading || isProcessing) return;
 
     if (user) {
-      // ✅ Already logged in (coming from dashboard) — go straight to SkipCash
-      router.push(paymentUrl);
+      // ✅ Already logged in (coming from dashboard) — go straight to payment gateway
+      setIsProcessing(true);
+      try {
+        const res = await fetch("/api/skipcash/create-session", {
+           method: "POST",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({
+              amount,
+              plan: planId,
+              userId: user.uid,
+              userEmail: user.email,
+              userName: user.displayName || "User"
+           })
+        });
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (data.url) {
+           window.location.href = data.url;
+        } else {
+           setIsProcessing(false);
+           alert("Could not start payment.");
+        }
+      } catch (err) {
+         setIsProcessing(false);
+         alert("Network error while starting payment.");
+      }
     } else {
-      // 🔒 Not logged in (coming from landing page) — sign up first, then SkipCash
+      // 🔒 Not logged in (coming from landing page) — sign up first, then SkipCash pass-through
+      const paymentUrl = `/page/skipcash?amount=${amount}&plan=${planId}`;
       const redirectUrl = `/page/signup?redirect=${encodeURIComponent(paymentUrl)}`;
       router.push(redirectUrl);
     }
@@ -98,9 +123,9 @@ export default function SubscriptionPricing() {
             <button
               className="start-button"
               onClick={() => handlePurchase(1.00, "monthly")}
-              disabled={loading}
+              disabled={loading || isProcessing}
             >
-              {loading ? "Loading..." : "Get Started Monthly"}
+              {loading ? "Loading..." : isProcessing ? "Redirecting..." : "Get Started Monthly"}
             </button>
           </div>
 
@@ -138,9 +163,9 @@ export default function SubscriptionPricing() {
             <button
               className="start-button"
               onClick={() => handlePurchase(2.00, "yearly")}
-              disabled={loading}
+              disabled={loading || isProcessing}
             >
-              {loading ? "Loading..." : "Get Started Yearly"}
+              {loading ? "Loading..." : isProcessing ? "Redirecting..." : "Get Started Yearly"}
             </button>
           </div>
         </div>

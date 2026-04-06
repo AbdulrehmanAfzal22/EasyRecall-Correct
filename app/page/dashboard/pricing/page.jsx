@@ -1,17 +1,51 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "../../AuthProvider";
 import "./pricing.css";
 
 export default function PricingSection() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
+  const [isProcessing, setIsProcessing] = useState(false);
   const showUpgradeBack = searchParams.get("from") === "upgrade";
 
-  const handlePurchase = (amount) => {
-    const paymentUrl = `/page/skipcash?amount=${amount}`;
-    const redirectUrl = `/page/signup?redirect=${encodeURIComponent(paymentUrl)}`;
-    router.push(redirectUrl);
+  const handlePurchase = async (amount, planId = "monthly") => {
+    if (isProcessing) return;
+    setIsProcessing(true);
+
+    if (user) {
+      try {
+        const res = await fetch("/api/skipcash/create-session", {
+           method: "POST",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({
+              amount,
+              plan: planId,
+              userId: user.uid,
+              userEmail: user.email,
+              userName: user.displayName || "User"
+           })
+        });
+        const text = await res.text();
+        const data = text ? JSON.parse(text) : {};
+        if (data.url) {
+           window.location.href = data.url;
+        } else {
+           setIsProcessing(false);
+           alert("Could not start payment.");
+        }
+      } catch (err) {
+         setIsProcessing(false);
+         alert("Network error while starting payment.");
+      }
+    } else {
+      const paymentUrl = `/page/skipcash?amount=${amount}&plan=${planId}`;
+      const redirectUrl = `/page/signup?redirect=${encodeURIComponent(paymentUrl)}`;
+      router.push(redirectUrl);
+    }
   };
 
   const features = [
@@ -96,9 +130,10 @@ export default function PricingSection() {
 
             <button
               className="start-button btn-blue"
-              onClick={() => handlePurchase(1.0)}
+              onClick={() => handlePurchase(1.0, "monthly")}
+              disabled={isProcessing}
             >
-              Get Started Monthly <span className="btn-arrow">→</span>
+              {isProcessing ? "Redirecting..." : <>Get Started Monthly <span className="btn-arrow">→</span></>}
             </button>
           </div>
 
@@ -147,9 +182,10 @@ export default function PricingSection() {
 
             <button
               className="start-button btn-violet"
-              onClick={() => handlePurchase(9.99)}
+              onClick={() => handlePurchase(9.99, "yearly")}
+              disabled={isProcessing}
             >
-              Get Started Yearly <span className="btn-arrow">→</span>
+              {isProcessing ? "Redirecting..." : <>Get Started Yearly <span className="btn-arrow">→</span></>}
             </button>
           </div>
         </div>
@@ -159,5 +195,11 @@ export default function PricingSection() {
         </div>
       </div>
     </section>
+
   );
 }
+
+
+
+
+
